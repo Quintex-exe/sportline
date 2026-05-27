@@ -944,6 +944,287 @@
   text-decoration:underline;
 }
 
+
+
+
+
+/* ── OPEN SOURCE VIDEO INTEL ── */
+
+#osint-video-panel{
+  position:fixed;
+  left:250px;
+  bottom:58px;
+  width:430px;
+  height:300px;
+  z-index:240;
+  background:rgba(3,12,10,0.94);
+  border:1px solid rgba(57,255,106,0.08);
+  border-radius:10px;
+  overflow:hidden;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 30px rgba(0,0,0,0.35);
+}
+
+.osint-header{
+  height:32px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 12px;
+  border-bottom:1px solid rgba(57,255,106,0.06);
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px;
+  color:#39ff6a;
+  letter-spacing:2px;
+  cursor:move;
+}
+
+.osint-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.osint-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#ff5f5f;
+  box-shadow:0 0 10px #ff5f5f;
+  animation:osintPulse 1.5s infinite;
+}
+
+@keyframes osintPulse{
+  0%,100%{opacity:1;}
+  50%{opacity:0.4;}
+}
+
+.osint-controls{
+  display:flex;
+  gap:10px;
+}
+
+.osint-btn{
+  cursor:pointer;
+  color:#6f9582;
+}
+
+.osint-btn:hover{
+  color:#fff;
+}
+
+#osint-video-panel.collapsed{
+  height:32px !important;
+}
+
+#osint-video-panel.collapsed .osint-body{
+  display:none;
+}
+
+.osint-body{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  height:calc(100% - 32px);
+}
+
+.osint-sidebar{
+  border-right:1px solid rgba(57,255,106,0.05);
+  overflow-y:auto;
+}
+
+.osint-source{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  cursor:pointer;
+  transition:background .2s ease;
+}
+
+.osint-source:hover,.osint-source.active{
+  background:rgba(57,255,106,0.06);
+}
+
+.osint-source-title{
+  color:#d9fff0;
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.osint-source-meta{
+  font-family:'Share Tech Mono', monospace;
+  font-size:8px;
+  color:#688877;
+  letter-spacing:1px;
+}
+
+.osint-viewer{
+  position:relative;
+  background:#000;
+}
+
+.osint-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#000;
+}
+
+.osint-overlay{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  display:flex;
+  gap:8px;
+}
+
+.osint-tag{
+  background:rgba(0,0,0,0.7);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:999px;
+  padding:4px 9px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:8px;
+  color:#d9fff0;
+  letter-spacing:1px;
+}
+
+
+.osint-video{
+  background:#000;
+}
+
+.osint-viewer::before{
+  content:'LIVE FOOTBALL VISUAL INTEL';
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:3;
+  font-family:'Share Tech Mono', monospace;
+  font-size:8px;
+  color:rgba(255,255,255,0.45);
+  letter-spacing:1px;
+}
+
+
+/* ── PART 5 : GLOBAL HEAT + SEARCH SYSTEM ── */
+
+
+
+#heat-overlay{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:6;
+  overflow:hidden;
+}
+
+.heat-ping{
+  position:absolute;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:rgba(255,70,70,0.8);
+  box-shadow:0 0 18px rgba(255,70,70,0.8);
+  animation:heatPulse 3.5s infinite;
+}
+
+@keyframes heatPulse{
+  0%{
+    transform:scale(0.4);
+    opacity:0;
+  }
+  20%{
+    opacity:1;
+  }
+  100%{
+    transform:scale(4);
+    opacity:0;
+  }
+}
+
+#global-activity-bar{
+  position:fixed;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  width:540px;
+  height:12px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.04);
+  overflow:hidden;
+  z-index:260;
+  border:1px solid rgba(57,255,106,0.08);
+  backdrop-filter:blur(10px);
+}
+
+.activity-fill{
+  height:100%;
+  width:62%;
+  background:linear-gradient(90deg,#39ff6a,#ffe66d,#ff5a5a);
+  box-shadow:0 0 18px rgba(57,255,106,0.3);
+  transition:width 1s ease;
+}
+
+#quick-actions{
+  position:fixed;
+  right:18px;
+  top:54px;
+  z-index:260;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.quick-btn{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:rgba(3,12,10,0.88);
+  border:1px solid rgba(57,255,106,0.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#7da08d;
+  font-family:'Share Tech Mono', monospace;
+  cursor:pointer;
+  backdrop-filter:blur(10px);
+  transition:all .22s ease;
+}
+
+.quick-btn:hover{
+  transform:scale(1.08);
+  color:#fff;
+  box-shadow:0 0 14px rgba(57,255,106,0.16);
+}
+
+
+.region-btn.active-region{
+  color:#39ff6a;
+  box-shadow:0 0 14px rgba(57,255,106,0.2);
+  border-color:rgba(57,255,106,0.22);
+}
+
+
+#region-dropdown{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+  max-height:420px;
+  overflow:hidden;
+  transition:all .32s ease;
+}
+
+#region-dropdown.collapsed-dropdown{
+  max-height:0;
+  opacity:0;
+  margin-top:0;
+  pointer-events:none;
+}
+
+#region-toggle{
+  color:#39ff6a;
+}
+
 </style>
 </head>
 <body>
@@ -1140,6 +1421,84 @@
 </div>
 
 
+
+
+
+  <div class="media-body" id="mediaBody"></div>
+</div>
+
+
+
+<div id="osint-video-panel">
+  <div class="osint-header">
+    <div class="osint-left">
+      <div class="osint-dot"></div>
+      <span>OPEN SOURCE VIDEO INTEL</span>
+    </div>
+
+    <div class="osint-controls">
+      <span class="osint-btn" id="osint-refresh">↻</span>
+      <span class="osint-btn" id="osint-collapse">—</span>
+    </div>
+  </div>
+
+  <div class="osint-body">
+    <div class="osint-sidebar" id="osintSidebar"></div>
+
+    <div class="osint-viewer">
+      <video id="osintVideo" class="osint-video" controls autoplay muted loop playsinline></video>
+
+      <div class="osint-overlay">
+        <div class="osint-tag" id="osintTag">LIVE CLIP</div>
+        <div class="osint-tag">OPEN SOURCE</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="quick-actions">
+
+  <div id="region-toggle" class="quick-btn">
+    ☰
+  </div>
+
+  <div id="region-dropdown" class="collapsed-dropdown">
+
+    <div class="quick-btn region-btn active-region"
+      data-region="europe">EU</div>
+
+    <div class="quick-btn region-btn"
+      data-region="southamerica">SA</div>
+
+    <div class="quick-btn region-btn"
+      data-region="northamerica">NA</div>
+
+    <div class="quick-btn region-btn"
+      data-region="asia">AS</div>
+
+    <div class="quick-btn region-btn"
+      data-region="africa">AF</div>
+
+    <div class="quick-btn region-btn"
+      data-region="global">◎</div>
+
+  </div>
+</div>
+
+<div id="heat-overlay">
+  <div class="heat-ping" style="left:28%;top:36%"></div>
+  <div class="heat-ping" style="left:54%;top:30%;animation-delay:1s"></div>
+  <div class="heat-ping" style="left:72%;top:44%;animation-delay:2s"></div>
+  <div class="heat-ping" style="left:36%;top:68%;animation-delay:1.4s"></div>
+</div>
+
+<div id="global-activity-bar">
+  <div class="activity-fill" id="activityFill"></div>
+</div>
+
+
 <!-- Globe -->
   <canvas id="globe-canvas"></canvas>
 
@@ -1272,6 +1631,12 @@ const ALERTS = [
     'Manchester City vs Arsenal social activity accelerating rapidly.',
     'El Clásico engagement metrics enter surge phase.',
     'Late VAR review reshapes match momentum.',
+    'Boca Juniors activity surge detected in Buenos Aires.',
+    'Inter Miami engagement spikes across North America.',
+    'Saudi Pro League scouting chatter increasing rapidly.',
+    'CAF continental tournament metrics accelerating.',
+    'Flamengo tactical discussions dominating South American feeds.',
+    'Al Nassr social signal expansion observed in Asia.',
   ]},
 ];
 
@@ -1942,6 +2307,313 @@ renderSourcePanel();
 })();
 
 
+
+
+// ── OPEN SOURCE VIDEO INTEL ─────────────────────────────
+
+
+
+const OSINT_VIDEO_FEEDS = [
+  {
+    title:'Matchday Tactical Feed',
+    meta:'STADIUM INTEL',
+    tag:'MATCHDAY',
+    video:'https://www.w3schools.com/html/mov_bbb.mp4'
+  },
+  {
+    title:'Training Ground Monitor',
+    meta:'CLUB SESSION',
+    tag:'TRAINING',
+    video:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4'
+  },
+  {
+    title:'Scouting Camera',
+    meta:'PLAYER ANALYSIS',
+    tag:'SCOUT',
+    video:'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm'
+  },
+  {
+    title:'Press Tunnel Feed',
+    meta:'MEDIA ACCESS',
+    tag:'LIVE ACCESS',
+    video:'https://www.w3schools.com/html/movie.mp4'
+  }
+];
+
+
+
+const osintSidebar = document.getElementById('osintSidebar');
+const osintVideo = document.getElementById('osintVideo');
+const osintTag = document.getElementById('osintTag');
+
+
+function loadFeed(feed){
+  osintVideo.pause();
+
+  osintVideo.src = feed.video;
+  osintTag.textContent = feed.tag;
+
+  osintVideo.load();
+
+  const playPromise = osintVideo.play();
+
+  if(playPromise !== undefined){
+    playPromise.catch(() => {
+      console.log('Autoplay blocked');
+    });
+  }
+}
+
+osintVideo.addEventListener('error', () => {
+  const viewer = document.querySelector('.osint-viewer');
+
+  if(!document.getElementById('videoErrorOverlay')){
+    const overlay = document.createElement('div');
+    overlay.id = 'videoErrorOverlay';
+
+    overlay.style.position = 'absolute';
+    overlay.style.inset = '0';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'rgba(0,0,0,0.72)';
+    overlay.style.color = '#6f9582';
+    overlay.style.fontFamily = "'Share Tech Mono', monospace";
+    overlay.style.fontSize = '10px';
+    overlay.style.letterSpacing = '1px';
+
+    overlay.textContent = 'VIDEO SOURCE TEMPORARILY UNAVAILABLE';
+
+    viewer.appendChild(overlay);
+  }
+});
+
+osintVideo.addEventListener('playing', () => {
+  const overlay = document.getElementById('videoErrorOverlay');
+
+  if(overlay) overlay.remove();
+});
+
+
+OSINT_VIDEO_FEEDS.forEach((feed,index)=>{
+  const el = document.createElement('div');
+  el.className = 'osint-source' + (index===0 ? ' active':'');
+  el.innerHTML = `
+    <div class="osint-source-title">${feed.title}</div>
+    <div class="osint-source-meta">${feed.meta}</div>
+  `;
+
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.osint-source').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    loadFeed(feed);
+  });
+
+  osintSidebar.appendChild(el);
+});
+
+loadFeed(OSINT_VIDEO_FEEDS[0]);
+
+(function(){
+  const panel = document.getElementById('osint-video-panel');
+  const header = panel.querySelector('.osint-header');
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  header.addEventListener('mousedown',(e)=>{
+    dragging = true;
+
+    const rect = panel.getBoundingClientRect();
+
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panel.style.bottom = 'auto';
+
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove',(e)=>{
+    if(!dragging) return;
+
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  window.addEventListener('mouseup',()=>{
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
+})();
+
+document.getElementById('osint-collapse').addEventListener('click', ()=>{
+  const panel = document.getElementById('osint-video-panel');
+
+  panel.classList.toggle('collapsed');
+
+  document.getElementById('osint-collapse').textContent =
+    panel.classList.contains('collapsed') ? '+' : '—';
+});
+
+document.getElementById('osint-refresh').addEventListener('click', ()=>{
+  osintVideo.currentTime = 0;
+  osintVideo.play();
+});
+
+
+
+
+// ── PART 5 : COMMAND SYSTEMS ─────────────────────────────
+
+const activityFill = document.getElementById('activityFill');
+
+setInterval(()=>{
+  activityFill.style.width =
+    (40 + Math.random()*55) + '%';
+}, 2600);
+
+
+
+
+// regional tactical focuses
+
+const REGION_CONFIG = {
+  europe:{
+    rotX:-0.22,
+    rotY:0.72,
+    zoom:1.55,
+    keywords:[
+      'arsenal','real madrid','barcelona','manchester',
+      'champions','premier','bundesliga','serie a',
+      'psg','liverpool','bayern','uefa'
+    ]
+  },
+
+  southamerica:{
+    rotX:0.12,
+    rotY:-1.02,
+    zoom:1.72,
+    keywords:[
+      'brazil','argentina','boca','river plate',
+      'libertadores','flamengo','palmeiras',
+      'neymar','messi'
+    ]
+  },
+
+  northamerica:{
+    rotX:-0.04,
+    rotY:-2.0,
+    zoom:1.68,
+    keywords:[
+      'mls','inter miami','usa','mexico',
+      'concacaf','lafc','canada'
+    ]
+  },
+
+  asia:{
+    rotX:-0.16,
+    rotY:1.74,
+    zoom:1.7,
+    keywords:[
+      'j league','k league','saudi',
+      'al nassr','afc','qatar',
+      'japan','korea'
+    ]
+  },
+
+  africa:{
+    rotX:0.04,
+    rotY:1.08,
+    zoom:1.8,
+    keywords:[
+      'caf','africa','egypt',
+      'morocco','senegal','al ahly'
+    ]
+  },
+
+  global:{
+    rotX:0,
+    rotY:0,
+    zoom:1,
+    keywords:null
+  }
+};
+
+let baseRadius = R;
+
+function applyRegionalFeed(region){
+
+  const config = REGION_CONFIG[region];
+
+  document.querySelectorAll('.alert-item').forEach(item=>{
+
+    const text = item.innerText.toLowerCase();
+
+    if(!config.keywords){
+      item.style.display = '';
+      return;
+    }
+
+    const visible = config.keywords.some(word =>
+      text.includes(word)
+    );
+
+    item.style.display = visible ? '' : 'none';
+  });
+}
+
+function focusRegion(region){
+
+  const config = REGION_CONFIG[region];
+
+  // smooth globe targeting
+  targetRotX = config.rotX;
+  targetRotY = config.rotY;
+
+  // region zoom
+  R = baseRadius * config.zoom;
+
+  applyRegionalFeed(region);
+
+  document.querySelectorAll('.region-btn').forEach(btn=>{
+    btn.classList.remove('active-region');
+  });
+
+  const activeBtn =
+    document.querySelector(`[data-region="${region}"]`);
+
+  if(activeBtn){
+    activeBtn.classList.add('active-region');
+  }
+}
+
+document.querySelectorAll('.region-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    focusRegion(btn.dataset.region);
+  });
+});
+
+
+// collapsible region dropdown
+const regionToggle = document.getElementById('region-toggle');
+const regionDropdown = document.getElementById('region-dropdown');
+
+regionToggle.addEventListener('click', ()=>{
+  regionDropdown.classList.toggle('collapsed-dropdown');
+
+  regionToggle.textContent =
+    regionDropdown.classList.contains('collapsed-dropdown')
+      ? '☰'
+      : '✕';
+});
+
+
+// initialize
+focusRegion('global');
 // ── Go ───────────────────────────────────────────────────────────────────────
 tick();
 </script>
