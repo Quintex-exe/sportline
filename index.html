@@ -1109,29 +1109,7 @@
 
 
 
-#heat-overlay{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:6;
-  overflow:hidden;
-}
 
-.heat-ping{
-  position:absolute;
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:rgba(255,70,70,0.8);
-  box-shadow:0 0 18px rgba(255,70,70,0.8);
-  animation:heatPulse 3.5s infinite;
-}
-
-@keyframes heatPulse{
-  0%{
-    transform:scale(0.4);
-    opacity:0;
-  }
   20%{
     opacity:1;
   }
@@ -1487,12 +1465,7 @@
   </div>
 </div>
 
-<div id="heat-overlay">
-  <div class="heat-ping" style="left:28%;top:36%"></div>
-  <div class="heat-ping" style="left:54%;top:30%;animation-delay:1s"></div>
-  <div class="heat-ping" style="left:72%;top:44%;animation-delay:2s"></div>
-  <div class="heat-ping" style="left:36%;top:68%;animation-delay:1.4s"></div>
-</div>
+
 
 <div id="global-activity-bar">
   <div class="activity-fill" id="activityFill"></div>
