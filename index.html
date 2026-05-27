@@ -747,6 +747,203 @@
   height:100%;
 }
 
+
+/* ── PART 4 : ADVANCED COMMAND SYSTEMS ── */
+
+#system-console{
+  position:fixed;
+  left:18px;
+  top:220px;
+  width:210px;
+  height:150px;
+  z-index:170;
+  background:rgba(3,12,10,0.82);
+  border:1px solid rgba(57,255,106,0.08);
+  border-radius:8px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 30px rgba(0,0,0,0.28);
+  overflow:hidden;
+}
+
+.console-header{
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+  border-bottom:1px solid rgba(57,255,106,0.06);
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px;
+  letter-spacing:1px;
+  color:#39ff6a;
+  cursor:move;
+}
+
+.console-stream{
+  height:126px;
+  overflow:hidden;
+  padding:8px 10px;
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px;
+  color:#6d9681;
+  line-height:1.8;
+}
+
+.console-line{
+  opacity:0;
+  animation:consoleFade .4s forwards;
+}
+
+@keyframes consoleFade{
+  to{opacity:1;}
+}
+
+#crosshair{
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:14px;
+  height:14px;
+  transform:translate(-50%,-50%);
+  z-index:20;
+  pointer-events:none;
+  opacity:0.22;
+}
+
+.cross-x,.cross-y{
+  position:absolute;
+  background:rgba(57,255,106,0.25);
+}
+
+.cross-x{
+  left:0;
+  right:0;
+  top:6px;
+  height:1px;
+}
+
+.cross-y{
+  top:0;
+  bottom:0;
+  left:6px;
+  width:1px;
+}
+
+#status-orb{
+  position:fixed;
+  right:270px;
+  top:54px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#39ff6a;
+  box-shadow:0 0 18px #39ff6a;
+  z-index:220;
+  animation:orbPulse 2s infinite;
+}
+
+@keyframes orbPulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(0.7);}
+}
+
+
+/* ── LIVE SOURCES / X INTEGRATION ── */
+
+#source-panel{
+  position:fixed;
+  left:18px;
+  top:390px;
+  width:210px;
+  z-index:185;
+  background:rgba(3,12,10,0.84);
+  border:1px solid rgba(57,255,106,0.08);
+  border-radius:8px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 30px rgba(0,0,0,0.28);
+  overflow:hidden;
+}
+
+.source-header{
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+  border-bottom:1px solid rgba(57,255,106,0.06);
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px;
+  color:#39ff6a;
+  letter-spacing:1px;
+  cursor:move;
+}
+
+.source-stream{
+  max-height:220px;
+  overflow-y:auto;
+}
+
+.source-stream::-webkit-scrollbar{
+  width:3px;
+}
+
+.source-stream::-webkit-scrollbar-thumb{
+  background:rgba(57,255,106,0.15);
+}
+
+.source-item{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  transition:background .22s ease;
+}
+
+.source-item:hover{
+  background:rgba(255,255,255,0.03);
+}
+
+.source-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:5px;
+}
+
+.source-handle{
+  color:#d9fff0;
+  text-decoration:none;
+  font-family:'Share Tech Mono', monospace;
+  font-size:10px;
+}
+
+.source-handle:hover{
+  color:#5af5ff;
+}
+
+.source-tag{
+  font-family:'Share Tech Mono', monospace;
+  font-size:8px;
+  letter-spacing:1px;
+  color:#39ff6a;
+}
+
+.source-text{
+  font-size:11px;
+  line-height:1.5;
+  color:#7da08d;
+  margin-bottom:6px;
+}
+
+.source-link{
+  font-family:'Share Tech Mono', monospace;
+  font-size:9px;
+  color:#5af5ff;
+  text-decoration:none;
+}
+
+.source-link:hover{
+  text-decoration:underline;
+}
+
 </style>
 </head>
 <body>
@@ -907,6 +1104,42 @@
   </div>
 
 
+
+<div id="status-orb"></div>
+
+<div id="crosshair">
+  <div class="cross-x"></div>
+  <div class="cross-y"></div>
+</div>
+
+
+</div>
+
+<div id="system-console" class="draggable-panel">
+  <div class="console-header drag-handle">
+    SYSTEM CONSOLE
+    <span class="panel-toggle" data-target="system-console">—</span>
+  </div>
+
+  <div class="panel-body">
+    <div class="console-stream" id="consoleStream"></div>
+  </div>
+</div>
+
+
+
+<div id="source-panel" class="draggable-panel">
+  <div class="source-header drag-handle">
+    LIVE X SOURCES
+    <span class="panel-toggle" data-target="source-panel">—</span>
+  </div>
+
+  <div class="panel-body">
+    <div class="source-stream" id="sourceStream"></div>
+  </div>
+</div>
+
+
 <!-- Globe -->
   <canvas id="globe-canvas"></canvas>
 
@@ -1007,43 +1240,41 @@ const NODES = [
   { id:'bog', name:'Bogotá',        club:'Millonarios FC',       lat:4.7,   lng:-74.1,  type:'scout'    },
 ];
 
+
 const ALERTS = [
   { type:'transfer', templates:[
-    'Striker linked to Premier League giants. Fee could reach €85m.',
-    'Bundesliga winger enters final year of contract. Suitors circle.',
-    'Midfielder available on free transfer this summer.',
-    'Fee agreed for South American forward. Medical pending.',
-    'Club triggers €40m release clause. Move imminent.',
-    'Agent spotted in London. Negotiations advanced.',
+    'Fabrizio Romano reports Viktor Gyökeres remains Arsenal priority target.',
+    'Florian Wirtz linked with major Premier League move amid contract talks.',
+    'Real Madrid monitoring Alphonso Davies situation closely.',
+    'Liverpool increase pressure in pursuit of Martín Zubimendi.',
+    'Victor Osimhen negotiations intensify ahead of summer window.',
   ]},
   { type:'injury', templates:[
-    'First-team defender ruled out 6–8 weeks. ACL confirmed.',
-    'Star striker doubt for weekend clash. Hamstring concern.',
-    'Goalkeeper fractures hand in training. Out until December.',
-    'Key midfielder misses squad due to knock. Scan results awaited.',
+    'Kevin De Bruyne training load reduced ahead of weekend fixture.',
+    'Pedri monitored after minor muscular discomfort during session.',
+    'Bukayo Saka doubtful after late impact injury.',
+    'Neymar rehabilitation process enters final stage.',
   ]},
   { type:'signing', templates:[
-    'Club confirms marquee summer signing. 4-year deal.',
-    'New contract confirmed by board. €12m/yr wages agreed.',
-    'Youth academy product signs first professional terms.',
-    'Loan deal extended to permanent. Fee: €22m.',
-    'International winger lands ahead of medical.',
+    'Chelsea finalize long-term agreement with South American prospect.',
+    'Barcelona reach verbal agreement with emerging midfield target.',
+    'Bayern activate advanced contract discussions with defensive reinforcement.',
+    'Manchester United preparing official bid package.',
   ]},
   { type:'scout', templates:[
-    'Delegation spotted at U21 tournament. Four targets identified.',
-    'Director of Football flies to Buenos Aires for talks.',
-    'Scout report filed on emerging left-back, rated 87.',
-    'Agent meeting confirmed at neutral location.',
-    'Video analysis team assigned to three Serie A midfielders.',
+    'Scouting department tracking Endrick performance metrics live.',
+    'Multi-club recruitment delegation attends Libertadores fixture.',
+    'Data analysts flag breakout performances in Serie A.',
+    'Live tactical review initiated for UCL knockout match.',
   ]},
   { type:'match', templates:[
-    'Champions League semi-final date confirmed.',
-    'El Clásico ticket ballot opens midnight UTC.',
-    'MLS expansion franchise approved for 2027 season.',
-    'Late penalty decides continental derby. VAR controversy.',
-    'World Cup qualifier: group table reshuffled.',
+    'Champions League intensity spike detected across Europe.',
+    'Manchester City vs Arsenal social activity accelerating rapidly.',
+    'El Clásico engagement metrics enter surge phase.',
+    'Late VAR review reshapes match momentum.',
   ]},
 ];
+
 
 const TYPE_COLORS = {
   transfer: '#39ff6a',
@@ -1409,6 +1640,80 @@ setInterval(() => {
 }, 2400);
 
 
+
+// PART 4 : draggable system console
+(function(){
+  const panel = document.getElementById('system-console');
+  const handle = panel.querySelector('.drag-handle');
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener('mousedown', (e)=>{
+    dragging = true;
+
+    const rect = panel.getBoundingClientRect();
+
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+  });
+
+  window.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  window.addEventListener('mouseup', ()=>{
+    dragging = false;
+  });
+})();
+
+// console stream
+const consoleMessages = [
+  'SCOUTING GRID REFRESHED',
+  'TRANSFER ROUTE DETECTED',
+  'LIVE MATCH SIGNAL LOCKED',
+  'UPLINK SYNCHRONIZED',
+  'EVENT CASCADE ANALYZED',
+  'MARKET ACTIVITY SURGING',
+  'TACTICAL FEED UPDATED',
+  'PLAYER MOVEMENT TRACKED',
+  'REGIONAL SIGNAL STABLE',
+  'MATCH INTENSITY ELEVATED'
+];
+
+function pushConsoleLine(){
+  const stream = document.getElementById('consoleStream');
+
+  const line = document.createElement('div');
+  line.className = 'console-line';
+
+  const now = new Date();
+  const ts =
+    String(now.getUTCHours()).padStart(2,'0') + ':' +
+    String(now.getUTCMinutes()).padStart(2,'0') + ':' +
+    String(now.getUTCSeconds()).padStart(2,'0');
+
+  line.textContent =
+    '[' + ts + '] ' +
+    consoleMessages[Math.floor(Math.random()*consoleMessages.length)];
+
+  stream.prepend(line);
+
+  while(stream.children.length > 7){
+    stream.removeChild(stream.lastChild);
+  }
+}
+
+setInterval(pushConsoleLine, 1800);
+pushConsoleLine();
+
 // ── Clock ────────────────────────────────────────────────────────────────────
 
 function updateClock() {
@@ -1536,6 +1841,105 @@ document.querySelectorAll('.panel-toggle').forEach(btn => {
   });
 });
 
+
+
+
+// ── LIVE X / NEWS SOURCES ─────────────────────────────────────────────
+
+const LIVE_SOURCES = [
+  {
+    handle:'@FabrizioRomano',
+    tag:'TRANSFER',
+    text:'Exclusive updates on transfer negotiations, here we go signals and contract breakthroughs.',
+    url:'https://x.com/FabrizioRomano'
+  },
+  {
+    handle:'@David_Ornstein',
+    tag:'INTEL',
+    text:'Reliable football intelligence and club-level reporting from Europe.',
+    url:'https://x.com/David_Ornstein'
+  },
+  {
+    handle:'@plettigoal',
+    tag:'BUNDESLIGA',
+    text:'German football transfer and tactical reporting monitored live.',
+    url:'https://x.com/Plettigoal'
+  },
+  {
+    handle:'@FabriceHawkins',
+    tag:'SCOUT',
+    text:'French football scouting and transfer movement tracking.',
+    url:'https://x.com/FabriceHawkins'
+  },
+  {
+    handle:'@TheAthleticFC',
+    tag:'MATCH',
+    text:'Real-time football reporting, tactical insights and match intelligence.',
+    url:'https://x.com/TheAthleticFC'
+  }
+];
+
+function renderSourcePanel(){
+  const stream = document.getElementById('sourceStream');
+
+  LIVE_SOURCES.forEach(src => {
+    const item = document.createElement('div');
+    item.className = 'source-item';
+
+    item.innerHTML = `
+      <div class="source-top">
+        <a class="source-handle" href="${src.url}" target="_blank">${src.handle}</a>
+        <span class="source-tag">${src.tag}</span>
+      </div>
+
+      <div class="source-text">${src.text}</div>
+
+      <a class="source-link" href="${src.url}" target="_blank">
+        OPEN LIVE SOURCE →
+      </a>
+    `;
+
+    stream.appendChild(item);
+  });
+}
+
+renderSourcePanel();
+
+// draggable source panel
+(function(){
+  const panel = document.getElementById('source-panel');
+  const handle = panel.querySelector('.drag-handle');
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener('mousedown', (e)=>{
+    dragging = true;
+
+    const rect = panel.getBoundingClientRect();
+
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e)=>{
+    if(!dragging) return;
+
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  window.addEventListener('mouseup', ()=>{
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
+})();
 
 
 // ── Go ───────────────────────────────────────────────────────────────────────
