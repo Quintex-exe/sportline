@@ -436,6 +436,152 @@
       backdrop-filter:blur(8px);
     }
 
+
+    /* ── FILTER + SIGNAL SYSTEM ── */
+
+    #signal-panel{
+      position:fixed;
+      top:92px;
+      right:258px;
+      width:210px;
+      z-index:150;
+      background:rgba(3,12,10,0.82);
+      border:1px solid rgba(57,255,106,0.08);
+      border-radius:8px;
+      backdrop-filter:blur(10px);
+      padding:12px;
+      box-shadow:0 0 30px rgba(0,0,0,0.28);
+    }
+
+    .signal-title{
+      font-family:'Share Tech Mono', monospace;
+      font-size:10px;
+      color:#39ff6a;
+      letter-spacing:2px;
+      margin-bottom:10px;
+    }
+
+    .signal-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    .signal-box{
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:6px;
+      padding:8px;
+    }
+
+    .signal-label{
+      font-family:'Share Tech Mono', monospace;
+      font-size:8px;
+      color:#557566;
+      letter-spacing:1px;
+      margin-bottom:6px;
+    }
+
+    .signal-value{
+      font-family:'Share Tech Mono', monospace;
+      font-size:18px;
+      color:#d7fff1;
+    }
+
+    #filter-bar{
+      position:fixed;
+      top:92px;
+      left:210px;
+      z-index:160;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .filter-chip{
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(3,12,10,0.82);
+      border:1px solid rgba(57,255,106,0.08);
+      color:#6d9681;
+      font-size:10px;
+      font-family:'Share Tech Mono', monospace;
+      letter-spacing:1px;
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+      transition:all .25s ease;
+      user-select:none;
+    }
+
+    .filter-chip:hover,
+    .filter-chip.active{
+      color:#39ff6a;
+      border-color:rgba(57,255,106,0.22);
+      box-shadow:0 0 12px rgba(57,255,106,0.12);
+      transform:translateY(-1px);
+    }
+
+    #pulse-alert{
+      position:fixed;
+      top:92px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:170;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(18,24,24,0.88);
+      border:1px solid rgba(255,120,120,0.14);
+      color:#ffd9d9;
+      font-family:'Share Tech Mono', monospace;
+      font-size:9px;
+      letter-spacing:1px;
+      padding:7px 10px;
+      border-radius:999px;
+      backdrop-filter:blur(10px);
+      box-shadow:0 0 14px rgba(255,80,80,0.12);
+      transition:all .28s ease;
+      max-width:320px;
+    }
+
+    #pulse-alert.minimized{
+      width:36px;
+      overflow:hidden;
+      padding:7px;
+      justify-content:center;
+    }
+
+    #pulse-alert.minimized .pulse-text{
+      display:none;
+    }
+
+    .pulse-dot{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:#ff6b6b;
+      box-shadow:0 0 10px #ff6b6b;
+      animation:pulseAlertDot 1.6s infinite;
+      flex-shrink:0;
+    }
+
+    @keyframes pulseAlertDot{
+      0%,100%{opacity:1;transform:scale(1);}
+      50%{opacity:0.45;transform:scale(0.7);}
+    }
+
+    .pulse-collapse{
+      cursor:pointer;
+      color:#7f9d8d;
+      font-size:10px;
+      user-select:none;
+      transition:color .2s ease;
+    }
+
+    .pulse-collapse:hover{
+      color:#ffffff;
+    }
+
 </style>
 </head>
 <body>
@@ -491,6 +637,48 @@
 
     <div class="sector-row"><span>NORTH AMERICA</span><span>69%</span></div>
     <div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div>
+  </div>
+
+
+  
+  <div id="filter-bar">
+    <div class="filter-chip active" data-filter="all">ALL SIGNALS</div>
+    <div class="filter-chip" data-filter="transfer">TRANSFERS</div>
+    <div class="filter-chip" data-filter="match">MATCHES</div>
+    <div class="filter-chip" data-filter="scout">SCOUTING</div>
+    <div class="filter-chip" data-filter="injury">INJURIES</div>
+  </div>
+
+  <div id="pulse-alert">
+    <div class="pulse-dot"></div>
+    <div class="pulse-text">PRIORITY SIGNAL • UCL ACTIVITY SPIKE DETECTED</div>
+    <div class="pulse-collapse" id="pulseCollapse">—</div>
+  </div>
+
+  <div id="signal-panel">
+    <div class="signal-title">GLOBAL SIGNAL STATUS</div>
+
+    <div class="signal-grid">
+      <div class="signal-box">
+        <div class="signal-label">LIVE MATCHES</div>
+        <div class="signal-value" id="sig-live">27</div>
+      </div>
+
+      <div class="signal-box">
+        <div class="signal-label">ACTIVE TRANSFERS</div>
+        <div class="signal-value" id="sig-transfer">143</div>
+      </div>
+
+      <div class="signal-box">
+        <div class="signal-label">SCOUT OPS</div>
+        <div class="signal-value" id="sig-scout">38</div>
+      </div>
+
+      <div class="signal-box">
+        <div class="signal-label">MARKET HEAT</div>
+        <div class="signal-value" id="sig-heat">91%</div>
+      </div>
+    </div>
   </div>
 
 
@@ -933,6 +1121,57 @@ canvas.addEventListener('wheel', e => {
 }, { passive:false });
 
 
+
+
+// Priority signal collapse
+const pulseAlert = document.getElementById('pulse-alert');
+const pulseCollapse = document.getElementById('pulseCollapse');
+
+pulseCollapse.addEventListener('click', () => {
+  pulseAlert.classList.toggle('minimized');
+  pulseCollapse.textContent = pulseAlert.classList.contains('minimized') ? '+' : '—';
+});
+
+
+// Filter chip interactions + feed syncing
+let activeFilter = 'all';
+
+function applyFeedFilter() {
+  document.querySelectorAll('.alert-item').forEach(item => {
+    const type = item.getAttribute('data-type');
+
+    if (activeFilter === 'all' || type === activeFilter) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.classList.remove('active');
+    });
+
+    chip.classList.add('active');
+
+    activeFilter = chip.getAttribute('data-filter');
+
+    applyFeedFilter();
+  });
+});
+
+// Dynamic signal panel
+setInterval(() => {
+  document.getElementById('sig-live').textContent = 20 + Math.floor(Math.random()*15);
+  document.getElementById('sig-transfer').textContent = 120 + Math.floor(Math.random()*60);
+  document.getElementById('sig-scout').textContent = 20 + Math.floor(Math.random()*25);
+  document.getElementById('sig-heat').textContent = 70 + Math.floor(Math.random()*30) + '%';
+}, 3000);
+
+
 // ── Clock ────────────────────────────────────────────────────────────────────
 
 function updateClock() {
@@ -971,12 +1210,17 @@ function spawnEvent() {
   const list = document.getElementById('alert-list');
   const item = document.createElement('div');
   item.className = 'alert-item';
+  item.setAttribute('data-type', type);
+
   item.innerHTML =
     `<span class="alert-badge badge-${type}">${type.toUpperCase()}</span><br>` +
     `<div class="alert-route">${from.name}<span class="arrow">→</span>${to.name}</div>` +
     `<div class="alert-body">${body}</div>` +
     `<div class="alert-time">${ts} UTC</div>`;
   list.insertBefore(item, list.firstChild);
+
+  applyFeedFilter();
+
   while (list.children.length > 40) list.removeChild(list.lastChild);
 }
 
