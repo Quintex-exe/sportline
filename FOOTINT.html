@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FOOTINT — Football Global Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #030809;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      color: #c8f0d0;
+    }
+
+    /* ── TOP BAR ── */
+    #top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      background: rgba(3,8,9,0.92);
+      border-bottom: 1px solid rgba(57,255,106,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      z-index: 100;
+      backdrop-filter: blur(6px);
+    }
+
+    .tb-left { display: flex; align-items: center; gap: 12px; }
+    .tb-right { display: flex; align-items: center; gap: 18px; }
+
+    .logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 15px;
+      color: #39ff6a;
+      letter-spacing: 3px;
+      text-shadow: 0 0 12px rgba(57,255,106,0.6);
+    }
+
+    .logo span { color: #5af5ff; }
+
+    .status-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(57,255,106,0.08);
+      border: 1px solid rgba(57,255,106,0.2);
+      border-radius: 20px;
+      padding: 2px 10px;
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #39ff6a;
+      box-shadow: 0 0 6px #39ff6a;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.4; transform:scale(0.7); }
+    }
+
+    .live-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: #39ff6a;
+      letter-spacing: 1.5px;
+    }
+
+    #utc-clock {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: #5af5ff;
+      letter-spacing: 1px;
+    }
+
+    #event-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: #456;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── GLOBE CANVAS ── */
+    #globe-canvas {
+      position: fixed;
+      top: 44px;
+      left: 0;
+      right: 240px;
+      bottom: 40px;
+      display: block;
+      cursor: grab;
+    }
+
+    #globe-canvas:active { cursor: grabbing; }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      position: fixed;
+      top: 44px; right: 0;
+      width: 240px;
+      bottom: 0;
+      background: rgba(3,8,9,0.95);
+      border-left: 1px solid rgba(57,255,106,0.1);
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .sidebar-header {
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid rgba(57,255,106,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: #39ff6a;
+      letter-spacing: 2px;
+    }
+
+    .sidebar-count {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: #334;
+    }
+
+    #alert-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    #alert-list::-webkit-scrollbar { width: 3px; }
+    #alert-list::-webkit-scrollbar-track { background: transparent; }
+    #alert-list::-webkit-scrollbar-thumb { background: rgba(57,255,106,0.15); border-radius: 2px; }
+
+    .alert-item {
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      animation: slideIn 0.4s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(8px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    .alert-badge {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      padding: 1px 6px;
+      border-radius: 2px;
+      margin-bottom: 4px;
+    }
+
+    .badge-transfer { background: rgba(57,255,106,0.12); color: #39ff6a; }
+    .badge-injury   { background: rgba(255,107,107,0.12); color: #ff6b6b; }
+    .badge-signing  { background: rgba(90,245,255,0.12);  color: #5af5ff; }
+    .badge-scout    { background: rgba(249,199,79,0.12);  color: #f9c74f; }
+    .badge-match    { background: rgba(208,170,255,0.12); color: #d0aaff; }
+
+    .alert-route {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ddf0e4;
+      margin-bottom: 2px;
+    }
+
+    .alert-route .arrow { color: #39ff6a; margin: 0 4px; }
+
+    .alert-body {
+      font-size: 11px;
+      color: #7a9e88;
+      line-height: 1.45;
+      margin-bottom: 2px;
+    }
+
+    .alert-time {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: #2a4a34;
+    }
+
+    /* ── BOTTOM BAR ── */
+    #bottom-bar {
+      position: fixed;
+      bottom: 0; left: 0;
+      right: 240px;
+      height: 40px;
+      background: rgba(3,8,9,0.9);
+      border-top: 1px solid rgba(57,255,106,0.08);
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      gap: 24px;
+      z-index: 100;
+    }
+
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px;
+      color: #445;
+      letter-spacing: 1px;
+    }
+
+    .legend-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── TOOLTIP ── */
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      display: none;
+      z-index: 200;
+      background: rgba(3,14,8,0.96);
+      border: 1px solid rgba(57,255,106,0.25);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: #c8f0d0;
+      line-height: 1.7;
+      min-width: 130px;
+    }
+
+    /* ── SCAN LINE ── */
+    .scan-line {
+      position: fixed;
+      left: 0; right: 240px;
+      height: 1px;
+      background: linear-gradient(to right, transparent 5%, rgba(57,255,106,0.12) 40%, rgba(57,255,106,0.18) 50%, rgba(57,255,106,0.12) 60%, transparent 95%);
+      pointer-events: none;
+      z-index: 10;
+      animation: scanMove 10s linear infinite;
+    }
+
+    @keyframes scanMove {
+      0%   { top: 44px; opacity:0; }
+      3%   { opacity:1; }
+      97%  { opacity:1; }
+      100% { top: calc(100% - 40px); opacity:0; }
+    }
+
+    /* ── CRT VIGNETTE ── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 300;
+      background: radial-gradient(ellipse at center,
+        transparent 55%,
+        rgba(0,0,0,0.45) 100%
+      );
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div id="top-bar">
+    <div class="tb-left">
+      <div class="logo">FOOT<span>INT</span></div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span class="live-text">LIVE</span>
+      </div>
+      <span id="event-count">0 events tracked</span>
+    </div>
+    <div class="tb-right">
+      <div id="utc-clock">UTC 00:00:00</div>
+    </div>
+  </div>
+
+  <!-- Globe -->
+  <canvas id="globe-canvas"></canvas>
+
+  <!-- Scan line overlay -->
+  <div class="scan-line"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">INTEL FEED</span>
+      <span class="sidebar-count" id="feed-count">0</span>
+    </div>
+    <div id="alert-list"></div>
+  </div>
+
+  <!-- Bottom legend -->
+  <div id="bottom-bar">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#39ff6a;box-shadow:0 0 5px #39ff6a"></div>TRANSFER
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#ff6b6b;box-shadow:0 0 5px #ff6b6b"></div>INJURY
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#5af5ff;box-shadow:0 0 5px #5af5ff"></div>SIGNING
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f9c74f;box-shadow:0 0 5px #f9c74f"></div>SCOUT
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#d0aaff;box-shadow:0 0 5px #d0aaff"></div>MATCH
+    </div>
+    <div class="legend-item" style="margin-left:auto;color:#223;font-size:9px;">
+      DRAG TO ROTATE
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- CRT vignette -->
+  <div class="vignette"></div>
+
+<script>
+const canvas = document.getElementById('globe-canvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = true;
+
+let W, H, cx, cy;
+const R_BASE = 220;
+let R = R_BASE;
+
+function resize() {
+  const sidebar = 240, topBar = 44, bottomBar = 40;
+  W = window.innerWidth - sidebar;
+  H = window.innerHeight - topBar - bottomBar;
+  canvas.width  = W;
+  canvas.height = H;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  R = Math.min(W, H) * 0.42;
+  cx = W / 2;
+  cy = H / 2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Data ────────────────────────────────────────────────────────────────────
+
+const NODES = [
+  { id:'lon', name:'London',        club:'Arsenal / Chelsea',    lat:51.5,  lng:-0.1,   type:'transfer' },
+  { id:'mad', name:'Madrid',        club:'Real Madrid',          lat:40.4,  lng:-3.7,   type:'signing'  },
+  { id:'par', name:'Paris',         club:'PSG',                  lat:48.9,  lng:2.3,    type:'scout'    },
+  { id:'mun', name:'Munich',        club:'Bayern München',       lat:48.1,  lng:11.6,   type:'transfer' },
+  { id:'mil', name:'Milan',         club:'AC / Inter Milan',     lat:45.5,  lng:9.2,    type:'signing'  },
+  { id:'lis', name:'Lisbon',        club:'Sporting / Benfica',   lat:38.7,  lng:-9.1,   type:'scout'    },
+  { id:'ams', name:'Amsterdam',     club:'Ajax',                 lat:52.4,  lng:4.9,    type:'transfer' },
+  { id:'sao', name:'São Paulo',     club:'Palmeiras',            lat:-23.5, lng:-46.6,  type:'transfer' },
+  { id:'rio', name:'Rio de Janeiro',club:'Flamengo',             lat:-22.9, lng:-43.2,  type:'scout'    },
+  { id:'bue', name:'Buenos Aires',  club:'River Plate',          lat:-34.6, lng:-58.4,  type:'injury'   },
+  { id:'nyc', name:'New York',      club:'NYCFC / RB New York',  lat:40.7,  lng:-74.0,  type:'match'    },
+  { id:'la',  name:'Los Angeles',   club:'LA Galaxy / LAFC',     lat:34.1,  lng:-118.2, type:'signing'  },
+  { id:'tok', name:'Tokyo',         club:'Urawa Red Diamonds',   lat:35.7,  lng:139.7,  type:'scout'    },
+  { id:'dub', name:'Dubai',         club:'Al Nassr / Al Hilal',  lat:25.2,  lng:55.3,   type:'signing'  },
+  { id:'joh', name:'Johannesburg',  club:'Kaizer Chiefs',        lat:-26.2, lng:28.0,   type:'scout'    },
+  { id:'lag', name:'Lagos',         club:'Enyimba FC',           lat:6.5,   lng:3.4,    type:'transfer' },
+  { id:'mex', name:'Mexico City',   club:'Club América',         lat:19.4,  lng:-99.1,  type:'match'    },
+  { id:'man', name:'Manchester',    club:'Man City / Man Utd',   lat:53.5,  lng:-2.2,   type:'injury'   },
+  { id:'bar', name:'Barcelona',     club:'FC Barcelona',         lat:41.4,  lng:2.2,    type:'match'    },
+  { id:'dor', name:'Dortmund',      club:'Borussia Dortmund',    lat:51.5,  lng:7.5,    type:'transfer' },
+  { id:'rom', name:'Rome',          club:'AS Roma / Lazio',      lat:41.9,  lng:12.5,   type:'match'    },
+  { id:'por', name:'Porto',         club:'FC Porto',             lat:41.1,  lng:-8.6,   type:'scout'    },
+  { id:'sei', name:'Seville',       club:'Sevilla FC',           lat:37.4,  lng:-5.9,   type:'transfer' },
+  { id:'mar', name:'Marseille',     club:'Olympique Marseille',  lat:43.3,  lng:5.4,    type:'match'    },
+  { id:'bog', name:'Bogotá',        club:'Millonarios FC',       lat:4.7,   lng:-74.1,  type:'scout'    },
+];
+
+const ALERTS = [
+  { type:'transfer', templates:[
+    'Striker linked to Premier League giants. Fee could reach €85m.',
+    'Bundesliga winger enters final year of contract. Suitors circle.',
+    'Midfielder available on free transfer this summer.',
+    'Fee agreed for South American forward. Medical pending.',
+    'Club triggers €40m release clause. Move imminent.',
+    'Agent spotted in London. Negotiations advanced.',
+  ]},
+  { type:'injury', templates:[
+    'First-team defender ruled out 6–8 weeks. ACL confirmed.',
+    'Star striker doubt for weekend clash. Hamstring concern.',
+    'Goalkeeper fractures hand in training. Out until December.',
+    'Key midfielder misses squad due to knock. Scan results awaited.',
+  ]},
+  { type:'signing', templates:[
+    'Club confirms marquee summer signing. 4-year deal.',
+    'New contract confirmed by board. €12m/yr wages agreed.',
+    'Youth academy product signs first professional terms.',
+    'Loan deal extended to permanent. Fee: €22m.',
+    'International winger lands ahead of medical.',
+  ]},
+  { type:'scout', templates:[
+    'Delegation spotted at U21 tournament. Four targets identified.',
+    'Director of Football flies to Buenos Aires for talks.',
+    'Scout report filed on emerging left-back, rated 87.',
+    'Agent meeting confirmed at neutral location.',
+    'Video analysis team assigned to three Serie A midfielders.',
+  ]},
+  { type:'match', templates:[
+    'Champions League semi-final date confirmed.',
+    'El Clásico ticket ballot opens midnight UTC.',
+    'MLS expansion franchise approved for 2027 season.',
+    'Late penalty decides continental derby. VAR controversy.',
+    'World Cup qualifier: group table reshuffled.',
+  ]},
+];
+
+const TYPE_COLORS = {
+  transfer: '#39ff6a',
+  injury:   '#ff6b6b',
+  signing:  '#5af5ff',
+  scout:    '#f9c74f',
+  match:    '#d0aaff',
+};
+
+// ── Globe state ──────────────────────────────────────────────────────────────
+
+let rotY = 0.5;
+let rotX = 0.2;
+let autoSpin = true;
+let isDragging = false;
+let lastMX = 0, lastMY = 0;
+
+const activeArcs = [];
+const nodeAlerts = {};
+let totalEvents = 0;
+let feedCount = 0;
+
+// ── Math helpers ─────────────────────────────────────────────────────────────
+
+function latLngTo3D(lat, lng) {
+  const phi   = (90 - lat) * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+  return {
+    x: -Math.sin(phi) * Math.cos(theta),
+    y:  Math.cos(phi),
+    z:  Math.sin(phi) * Math.sin(theta),
+  };
+}
+
+function project(p) {
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+  const x1 =  p.x * cosY - p.z * sinY;
+  const z1 =  p.x * sinY + p.z * cosY;
+  const y2 =  p.y * cosX - z1 * sinX;
+  const z2 =  p.y * sinX + z1 * cosX;
+  return { sx: cx + x1 * R, sy: cy - y2 * R, depth: z2 };
+}
+
+// ── Draw ─────────────────────────────────────────────────────────────────────
+
+function drawGlobe() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Outer glow
+  const atm = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R + 30);
+  atm.addColorStop(0,   'rgba(57,255,106,0.00)');
+  atm.addColorStop(0.5, 'rgba(57,255,106,0.07)');
+  atm.addColorStop(1,   'rgba(57,255,106,0.00)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, R + 30, 0, Math.PI * 2);
+  ctx.fillStyle = atm;
+  ctx.fill();
+
+  // Globe fill
+  const gFill = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.25, R * 0.1, cx, cy, R);
+  gFill.addColorStop(0, '#0a1f14');
+  gFill.addColorStop(1, '#020a06');
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.fillStyle = gFill;
+  ctx.fill();
+
+  // Globe border
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(57,255,106,0.2)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Grid lines
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  ctx.strokeStyle = '#39ff6a';
+  ctx.lineWidth = 0.5;
+
+  // Latitudes
+  for (let lat = -80; lat <= 80; lat += 20) {
+    ctx.beginPath();
+    let first = true;
+    for (let lng = -180; lng <= 180; lng += 2) {
+      const pr = project(latLngTo3D(lat, lng));
+      if (pr.depth < 0) { first = true; continue; }
+      if (first) { ctx.moveTo(pr.sx, pr.sy); first = false; }
+      else ctx.lineTo(pr.sx, pr.sy);
+    }
+    ctx.stroke();
+  }
+
+  // Longitudes
+  for (let lng = -180; lng < 180; lng += 20) {
+    ctx.beginPath();
+    let first = true;
+    for (let lat = -90; lat <= 90; lat += 2) {
+      const pr = project(latLngTo3D(lat, lng));
+      if (pr.depth < 0) { first = true; continue; }
+      if (first) { ctx.moveTo(pr.sx, pr.sy); first = false; }
+      else ctx.lineTo(pr.sx, pr.sy);
+    }
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  // Arcs
+  for (const arc of activeArcs) {
+    if (arc.progress >= 1) continue;
+    const color = TYPE_COLORS[arc.type];
+    const steps = 60;
+    const drawn = Math.floor(arc.progress * steps);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = 0.55 * Math.min(arc.progress * 3, 1);
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 5;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    let first = true;
+    for (let i = 0; i <= drawn; i++) {
+      const t = i / steps;
+      const lat = arc.from.lat + (arc.to.lat - arc.from.lat) * t;
+      const lng = arc.from.lng + (arc.to.lng - arc.from.lng) * t;
+      const pr = project(latLngTo3D(lat, lng));
+      if (pr.depth < -0.05) { first = true; continue; }
+      if (first) { ctx.moveTo(pr.sx, pr.sy); first = false; }
+      else ctx.lineTo(pr.sx, pr.sy);
+    }
+    ctx.stroke();
+
+    // Moving head dot
+    if (drawn > 0 && drawn < steps) {
+      const t = drawn / steps;
+      const lat = arc.from.lat + (arc.to.lat - arc.from.lat) * t;
+      const lng = arc.from.lng + (arc.to.lng - arc.from.lng) * t;
+      const pr = project(latLngTo3D(lat, lng));
+      if (pr.depth >= 0) {
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.arc(pr.sx, pr.sy, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // Nodes
+  const visible = NODES
+    .map(n => ({ ...n, pr: project(latLngTo3D(n.lat, n.lng)) }))
+    .filter(n => n.pr.depth >= -0.05)
+    .sort((a, b) => a.pr.depth - b.pr.depth);
+
+  for (const n of visible) {
+    const { sx, sy } = n.pr;
+    const color = TYPE_COLORS[n.type];
+    const pulseLevel = nodeAlerts[n.id] || 0;
+
+    ctx.save();
+
+    // Pulse ring
+    if (pulseLevel > 0) {
+      const ringR = 7 + pulseLevel * 5;
+      ctx.beginPath();
+      ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
+      ctx.fillStyle = color + '18';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(sx, sy, ringR * 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = color + '22';
+      ctx.fill();
+    }
+
+    // Node dot
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Inner bright core
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = 0.7;
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+// ── Animation loop ───────────────────────────────────────────────────────────
+
+function tick() {
+  requestAnimationFrame(tick);
+  if (autoSpin) rotY += 0.0015;
+
+  for (const arc of activeArcs) {
+    if (arc.progress < 1) arc.progress += 0.007;
+  }
+  if (activeArcs.length > 16) activeArcs.splice(0, activeArcs.length - 16);
+
+  drawGlobe();
+}
+
+// ── Interaction ──────────────────────────────────────────────────────────────
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  autoSpin = false;
+  lastMX = e.clientX;
+  lastMY = e.clientY;
+});
+
+window.addEventListener('mousemove', e => {
+  if (isDragging) {
+    rotY += (e.clientX - lastMX) * 0.005;
+    rotX += (e.clientY - lastMY) * 0.004;
+    rotX = Math.max(-1.3, Math.min(1.3, rotX));
+    lastMX = e.clientX;
+    lastMY = e.clientY;
+  }
+
+  // Tooltip — only check against canvas area
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const hit = NODES
+    .map(n => ({ ...n, pr: project(latLngTo3D(n.lat, n.lng)) }))
+    .filter(n => n.pr.depth >= 0)
+    .find(n => Math.hypot(n.pr.sx - mx, n.pr.sy - my) < 12);
+
+  const tip = document.getElementById('tooltip');
+  if (hit) {
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 16) + 'px';
+    tip.style.top  = (e.clientY - 10) + 'px';
+    const color = TYPE_COLORS[hit.type];
+    tip.innerHTML =
+      `<span style="color:${color};font-weight:700">${hit.name}</span><br>` +
+      `${hit.club}<br>` +
+      `<span style="color:#445">${hit.type.toUpperCase()} NODE</span>`;
+  } else {
+    tip.style.display = 'none';
+  }
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; setTimeout(() => autoSpin = true, 1200); });
+
+canvas.addEventListener('touchstart', e => {
+  isDragging = true;
+  autoSpin = false;
+  lastMX = e.touches[0].clientX;
+  lastMY = e.touches[0].clientY;
+  e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  rotY += (e.touches[0].clientX - lastMX) * 0.005;
+  rotX += (e.touches[0].clientY - lastMY) * 0.004;
+  rotX = Math.max(-1.3, Math.min(1.3, rotX));
+  lastMX = e.touches[0].clientX;
+  lastMY = e.touches[0].clientY;
+  e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchend', () => { isDragging = false; setTimeout(() => autoSpin = true, 1200); });
+
+// ── Clock ────────────────────────────────────────────────────────────────────
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2,'0');
+  const m = String(now.getUTCMinutes()).padStart(2,'0');
+  const s = String(now.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('utc-clock').textContent = `UTC ${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Event spawner ─────────────────────────────────────────────────────────────
+
+function spawnEvent() {
+  const group = ALERTS[Math.floor(Math.random() * ALERTS.length)];
+  const type  = group.type;
+  const body  = group.templates[Math.floor(Math.random() * group.templates.length)];
+  const from  = NODES[Math.floor(Math.random() * NODES.length)];
+  let to = NODES[Math.floor(Math.random() * NODES.length)];
+  while (to.id === from.id) to = NODES[Math.floor(Math.random() * NODES.length)];
+
+  activeArcs.push({ from, to, type, progress: 0 });
+
+  nodeAlerts[from.id] = Math.min(4, (nodeAlerts[from.id] || 0) + 1);
+  setTimeout(() => { if (nodeAlerts[from.id]) nodeAlerts[from.id]--; }, 5000);
+
+  totalEvents++;
+  feedCount++;
+  document.getElementById('event-count').textContent = `${totalEvents} events tracked`;
+  document.getElementById('feed-count').textContent = feedCount;
+
+  const now = new Date();
+  const ts = `${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}:${String(now.getUTCSeconds()).padStart(2,'0')}`;
+
+  const list = document.getElementById('alert-list');
+  const item = document.createElement('div');
+  item.className = 'alert-item';
+  item.innerHTML =
+    `<span class="alert-badge badge-${type}">${type.toUpperCase()}</span><br>` +
+    `<div class="alert-route">${from.name}<span class="arrow">→</span>${to.name}</div>` +
+    `<div class="alert-body">${body}</div>` +
+    `<div class="alert-time">${ts} UTC</div>`;
+  list.insertBefore(item, list.firstChild);
+  while (list.children.length > 40) list.removeChild(list.lastChild);
+}
+
+// Burst on load
+spawnEvent();
+setTimeout(spawnEvent, 600);
+setTimeout(spawnEvent, 1400);
+setTimeout(spawnEvent, 2200);
+
+// Ongoing cadence
+setInterval(() => {
+  spawnEvent();
+  if (Math.random() < 0.45) setTimeout(spawnEvent, 700);
+}, 3200);
+
+// ── Go ───────────────────────────────────────────────────────────────────────
+tick();
+</script>
+</body>
+</html>
