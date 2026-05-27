@@ -702,6 +702,38 @@
       color:#d9fff0;
     }
 
+
+/* draggable floating panels */
+.draggable-panel{
+  cursor:default;
+}
+
+.drag-handle{
+  cursor:move;
+  user-select:none;
+}
+
+.panel-toggle{
+  margin-left:auto;
+  cursor:pointer;
+  color:#6f9582;
+  font-size:11px;
+  padding-left:8px;
+}
+
+.panel-toggle:hover{
+  color:#ffffff;
+}
+
+.panel-collapsed{
+  height:28px !important;
+  overflow:hidden !important;
+}
+
+.panel-collapsed .panel-body{
+  display:none;
+}
+
 </style>
 </head>
 <body>
@@ -775,28 +807,33 @@
     <div class="pulse-collapse" id="pulseCollapse">—</div>
   </div>
 
-  <div id="signal-panel">
-    <div class="signal-title">GLOBAL SIGNAL STATUS</div>
+  <div id="signal-panel" class="draggable-panel">
+    <div class="signal-title drag-handle" style="display:flex;align-items:center;">
+      GLOBAL SIGNAL STATUS
+      <span class="panel-toggle" data-target="signal-panel">—</span>
+    </div>
 
-    <div class="signal-grid">
-      <div class="signal-box">
-        <div class="signal-label">LIVE MATCHES</div>
-        <div class="signal-value" id="sig-live">27</div>
-      </div>
+    <div class="panel-body">
+      <div class="signal-grid">
+        <div class="signal-box">
+          <div class="signal-label">LIVE MATCHES</div>
+          <div class="signal-value" id="sig-live">27</div>
+        </div>
 
-      <div class="signal-box">
-        <div class="signal-label">ACTIVE TRANSFERS</div>
-        <div class="signal-value" id="sig-transfer">143</div>
-      </div>
+        <div class="signal-box">
+          <div class="signal-label">ACTIVE TRANSFERS</div>
+          <div class="signal-value" id="sig-transfer">143</div>
+        </div>
 
-      <div class="signal-box">
-        <div class="signal-label">SCOUT OPS</div>
-        <div class="signal-value" id="sig-scout">38</div>
-      </div>
+        <div class="signal-box">
+          <div class="signal-label">SCOUT OPS</div>
+          <div class="signal-value" id="sig-scout">38</div>
+        </div>
 
-      <div class="signal-box">
-        <div class="signal-label">MARKET HEAT</div>
-        <div class="signal-value" id="sig-heat">91%</div>
+        <div class="signal-box">
+          <div class="signal-label">MARKET HEAT</div>
+          <div class="signal-value" id="sig-heat">91%</div>
+        </div>
       </div>
     </div>
   </div>
@@ -810,39 +847,49 @@
     <div class="radar-ring"></div>
   </div>
 
-  <div id="intel-footer">
-    <div class="ops-title">NETWORK STATUS</div>
-
-    <div class="intel-line">
-      <span>GLOBAL UPLINK</span>
-      <span class="intel-strong">STABLE</span>
+  <div id="intel-footer" class="draggable-panel">
+    <div class="ops-title drag-handle" style="display:flex;align-items:center;">
+      NETWORK STATUS
+      <span class="panel-toggle" data-target="intel-footer">—</span>
     </div>
 
-    <div class="intel-line">
-      <span>LIVE TRACKING</span>
-      <span class="intel-strong">ACTIVE</span>
-    </div>
+    <div class="panel-body">
+      <div class="intel-line">
+        <span>GLOBAL UPLINK</span>
+        <span class="intel-strong">STABLE</span>
+      </div>
 
-    <div class="intel-line">
-      <span>SIGNAL LATENCY</span>
-      <span class="intel-strong" id="latencyStat">42ms</span>
-    </div>
+      <div class="intel-line">
+        <span>LIVE TRACKING</span>
+        <span class="intel-strong">ACTIVE</span>
+      </div>
 
-    <div class="intel-line">
-      <span>EVENT FLOW</span>
-      <span class="intel-strong" id="eventFlow">HIGH</span>
+      <div class="intel-line">
+        <span>SIGNAL LATENCY</span>
+        <span class="intel-strong" id="latencyStat">42ms</span>
+      </div>
+
+      <div class="intel-line">
+        <span>EVENT FLOW</span>
+        <span class="intel-strong" id="eventFlow">HIGH</span>
+      </div>
     </div>
   </div>
 
-  <div id="intel-minimap">
-    <div class="mini-header">GLOBAL ACTIVITY GRID</div>
+  <div id="intel-minimap" class="draggable-panel">
+    <div class="mini-header drag-handle">
+      GLOBAL ACTIVITY GRID
+      <span class="panel-toggle" data-target="intel-minimap">—</span>
+    </div>
 
-    <div class="mini-grid">
-      <div class="mini-hotspot" style="left:22%;top:32%"></div>
-      <div class="mini-hotspot" style="left:48%;top:28%"></div>
-      <div class="mini-hotspot" style="left:72%;top:36%"></div>
-      <div class="mini-hotspot" style="left:28%;top:68%"></div>
-      <div class="mini-hotspot" style="left:62%;top:58%"></div>
+    <div class="panel-body">
+      <div class="mini-grid">
+        <div class="mini-hotspot" style="left:22%;top:32%"></div>
+        <div class="mini-hotspot" style="left:48%;top:28%"></div>
+        <div class="mini-hotspot" style="left:72%;top:36%"></div>
+        <div class="mini-hotspot" style="left:28%;top:68%"></div>
+        <div class="mini-hotspot" style="left:62%;top:58%"></div>
+      </div>
     </div>
   </div>
 
@@ -1422,6 +1469,60 @@ setInterval(() => {
   matches.textContent = 20 + Math.floor(Math.random() * 18);
   transfers.textContent = 120 + Math.floor(Math.random() * 60);
 }, 4000);
+
+
+
+// draggable tactical panels
+['intel-footer','intel-minimap','signal-panel'].forEach(id => {
+  const panel = document.getElementById(id);
+  const handle = panel.querySelector('.drag-handle');
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener('mousedown', (e) => {
+    dragging = true;
+
+    const rect = panel.getBoundingClientRect();
+
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    panel.style.left = rect.left + 'px';
+    panel.style.top = rect.top + 'px';
+    panel.style.right = 'auto';
+    panel.style.bottom = 'auto';
+
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if(!dragging) return;
+
+    panel.style.left = (e.clientX - offsetX) + 'px';
+    panel.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
+});
+
+// collapsable tactical panels
+document.querySelectorAll('.panel-toggle').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    const panel = document.getElementById(btn.dataset.target);
+
+    panel.classList.toggle('panel-collapsed');
+
+    btn.textContent = panel.classList.contains('panel-collapsed') ? '+' : '—';
+  });
+});
+
 
 
 // ── Go ───────────────────────────────────────────────────────────────────────
