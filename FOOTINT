@@ -337,6 +337,7 @@
 <script>
 const canvas = document.getElementById('globe-canvas');
 const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = true;
 
 let W, H, cx, cy;
 const R_BASE = 220;
@@ -680,7 +681,7 @@ window.addEventListener('mousemove', e => {
   }
 });
 
-window.addEventListener('mouseup', () => { isDragging = false; });
+window.addEventListener('mouseup', () => { isDragging = false; setTimeout(() => autoSpin = true, 1200); });
 
 canvas.addEventListener('touchstart', e => {
   isDragging = true;
@@ -700,7 +701,7 @@ window.addEventListener('touchmove', e => {
   e.preventDefault();
 }, { passive: false });
 
-window.addEventListener('touchend', () => { isDragging = false; });
+window.addEventListener('touchend', () => { isDragging = false; setTimeout(() => autoSpin = true, 1200); });
 
 // ── Clock ────────────────────────────────────────────────────────────────────
 
