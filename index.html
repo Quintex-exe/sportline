@@ -582,6 +582,126 @@
       color:#ffffff;
     }
 
+
+    /* ── PART 3 : TACTICAL OVERLAYS ── */
+
+    #live-radar{
+      position:fixed;
+      left:50%;
+      top:50%;
+      width:520px;
+      height:520px;
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+      z-index:8;
+      border-radius:50%;
+      opacity:0.22;
+      overflow:hidden;
+    }
+
+    .radar-ring{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      border:1px solid rgba(57,255,106,0.12);
+      animation:radarPulse 6s linear infinite;
+    }
+
+    .radar-ring:nth-child(2){animation-delay:2s;}
+    .radar-ring:nth-child(3){animation-delay:4s;}
+
+    @keyframes radarPulse{
+      0%{
+        transform:scale(0.2);
+        opacity:0;
+      }
+      20%{
+        opacity:0.25;
+      }
+      100%{
+        transform:scale(1.4);
+        opacity:0;
+      }
+    }
+
+    #intel-minimap{
+      position:fixed;
+      right:258px;
+      bottom:58px;
+      width:180px;
+      height:110px;
+      z-index:150;
+      background:rgba(3,12,10,0.82);
+      border:1px solid rgba(57,255,106,0.08);
+      border-radius:8px;
+      overflow:hidden;
+      backdrop-filter:blur(10px);
+      box-shadow:0 0 24px rgba(0,0,0,0.25);
+    }
+
+    .mini-header{
+      height:24px;
+      display:flex;
+      align-items:center;
+      padding:0 10px;
+      border-bottom:1px solid rgba(57,255,106,0.06);
+      font-family:'Share Tech Mono', monospace;
+      font-size:9px;
+      letter-spacing:1px;
+      color:#39ff6a;
+    }
+
+    .mini-grid{
+      position:relative;
+      width:100%;
+      height:calc(100% - 24px);
+      background:
+        linear-gradient(rgba(57,255,106,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,106,0.03) 1px, transparent 1px);
+      background-size:18px 18px;
+    }
+
+    .mini-hotspot{
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#39ff6a;
+      box-shadow:0 0 12px #39ff6a;
+      animation:miniBlink 1.8s infinite;
+    }
+
+    @keyframes miniBlink{
+      0%,100%{opacity:1;}
+      50%{opacity:0.35;}
+    }
+
+    #intel-footer{
+      position:fixed;
+      right:258px;
+      top:210px;
+      width:210px;
+      z-index:150;
+      background:rgba(3,12,10,0.82);
+      border:1px solid rgba(57,255,106,0.08);
+      border-radius:8px;
+      padding:10px;
+      backdrop-filter:blur(10px);
+    }
+
+    .intel-line{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:8px;
+      font-family:'Share Tech Mono', monospace;
+      font-size:9px;
+      color:#6f9582;
+    }
+
+    .intel-strong{
+      color:#d9fff0;
+    }
+
 </style>
 </head>
 <body>
@@ -682,7 +802,52 @@
   </div>
 
 
-  <!-- Globe -->
+  
+  <!-- PART 3 Tactical Radar -->
+  <div id="live-radar">
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+  </div>
+
+  <div id="intel-footer">
+    <div class="ops-title">NETWORK STATUS</div>
+
+    <div class="intel-line">
+      <span>GLOBAL UPLINK</span>
+      <span class="intel-strong">STABLE</span>
+    </div>
+
+    <div class="intel-line">
+      <span>LIVE TRACKING</span>
+      <span class="intel-strong">ACTIVE</span>
+    </div>
+
+    <div class="intel-line">
+      <span>SIGNAL LATENCY</span>
+      <span class="intel-strong" id="latencyStat">42ms</span>
+    </div>
+
+    <div class="intel-line">
+      <span>EVENT FLOW</span>
+      <span class="intel-strong" id="eventFlow">HIGH</span>
+    </div>
+  </div>
+
+  <div id="intel-minimap">
+    <div class="mini-header">GLOBAL ACTIVITY GRID</div>
+
+    <div class="mini-grid">
+      <div class="mini-hotspot" style="left:22%;top:32%"></div>
+      <div class="mini-hotspot" style="left:48%;top:28%"></div>
+      <div class="mini-hotspot" style="left:72%;top:36%"></div>
+      <div class="mini-hotspot" style="left:28%;top:68%"></div>
+      <div class="mini-hotspot" style="left:62%;top:58%"></div>
+    </div>
+  </div>
+
+
+<!-- Globe -->
   <canvas id="globe-canvas"></canvas>
 
   <!-- Scan line overlay -->
@@ -1170,6 +1335,18 @@ setInterval(() => {
   document.getElementById('sig-scout').textContent = 20 + Math.floor(Math.random()*25);
   document.getElementById('sig-heat').textContent = 70 + Math.floor(Math.random()*30) + '%';
 }, 3000);
+
+
+
+// PART 3 live tactical stats
+setInterval(() => {
+  document.getElementById('latencyStat').textContent =
+    (28 + Math.floor(Math.random()*35)) + 'ms';
+
+  const flowStates = ['LOW','MED','HIGH','SURGE'];
+  document.getElementById('eventFlow').textContent =
+    flowStates[Math.floor(Math.random()*flowStates.length)];
+}, 2400);
 
 
 // ── Clock ────────────────────────────────────────────────────────────────────
