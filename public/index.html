@@ -2791,6 +2791,89 @@ focusRegion('global');
 fetchRealNews();
 setInterval(fetchRealNews, 300000);
 
+
+
+// ── SOCKET.IO LIVE FEED CACHE ─────────────────────────────
+
+const socket = io();
+
+function renderCachedFeed(event){
+
+  totalEvents++;
+  feedCount++;
+
+  document.getElementById('event-count')
+    .textContent = `${totalEvents} events tracked`;
+
+  document.getElementById('feed-count')
+    .textContent = feedCount;
+
+  const now = new Date();
+
+  const ts =
+    `${String(now.getUTCHours()).padStart(2,'0')}:` +
+    `${String(now.getUTCMinutes()).padStart(2,'0')}:` +
+    `${String(now.getUTCSeconds()).padStart(2,'0')}`;
+
+  const list = document.getElementById('alert-list');
+
+  const item = document.createElement('div');
+
+  item.className = 'alert-item';
+
+  item.setAttribute('data-type', event.type || 'match');
+
+  item.innerHTML =
+    `<span class="alert-badge badge-${event.type || 'match'}">
+      ${(event.type || 'match').toUpperCase()}
+    </span><br>
+
+    <div class="alert-route">
+      LIVE FEED
+      <span class="arrow">→</span>
+      GLOBAL
+    </div>
+
+    <div class="alert-body">
+      <a href="${event.url || '#'}"
+         target="_blank"
+         style="color:#7a9e88;text-decoration:none;">
+         ${event.title || event.body}
+      </a>
+    </div>
+
+    <div class="alert-time">
+      ${ts} UTC
+    </div>`;
+
+  list.insertBefore(item, list.firstChild);
+
+  applyFeedFilter();
+
+  while(list.children.length > 40){
+    list.removeChild(list.lastChild);
+  }
+}
+
+// cached old feed
+socket.on('initial-feed', feeds => {
+
+  feeds.reverse().forEach(event => {
+
+    renderCachedFeed(event);
+
+  });
+
+});
+
+// live incoming feed
+socket.on('intel-event', event => {
+
+  renderCachedFeed(event);
+
+});
+
+
 // ── Go ───────────────────────────────────────────────────────────────────────
 tick();
 </script>
