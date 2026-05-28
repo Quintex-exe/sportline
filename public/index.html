@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOOTINT SOCKET.IO LIVE</title>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+body{
+margin:0;
+background:#040705;
+overflow:hidden;
+font-family:Arial,sans-serif;
+color:#d8ffe4;
+}
+
+#feed{
+position:fixed;
+right:0;
+top:0;
+width:340px;
+height:100vh;
+overflow-y:auto;
+background:rgba(0,0,0,.55);
+backdrop-filter:blur(12px);
+padding:14px;
+border-left:1px solid rgba(57,255,106,.18);
+}
+
+.item{
+padding:12px;
+margin-bottom:10px;
+border-radius:12px;
+background:rgba(255,255,255,.04);
+border:1px solid rgba(57,255,106,.12);
+}
+
+.type{
+display:inline-block;
+padding:4px 8px;
+border-radius:999px;
+background:rgba(57,255,106,.12);
+color:#39ff6a;
+font-size:11px;
+margin-bottom:8px;
+}
+
+.title{
+font-weight:bold;
+margin-bottom:8px;
+line-height:1.4;
+}
+
+.source{
+font-size:12px;
+opacity:.7;
+}
+
+#status{
+position:fixed;
+top:10px;
+left:10px;
+padding:12px 16px;
+border-radius:12px;
+background:rgba(0,0,0,.45);
+border:1px solid rgba(57,255,106,.14);
+}
+
+canvas{
+position:fixed;
+inset:0;
+}
+</style>
+</head>
+<body>
+
+<div id="status">
+FOOTINT LIVE SOCKET.IO
+</div>
+
+<canvas id="bg"></canvas>
+
+<div id="feed"></div>
+
+<script>
+
+const socket = io();
+
+const feed = document.getElementById('feed');
+
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+
+function resize(){
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+}
+resize();
+addEventListener('resize', resize);
+
+const nodes = [];
+
+function randomNode(){
+  return {
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height
+  };
+}
+
+function draw(){
+
+  ctx.fillStyle = 'rgba(4,7,5,0.12)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  nodes.forEach(n=>{
+
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,3,0,Math.PI*2);
+    ctx.fillStyle='#39ff6a';
+    ctx.fill();
+
+  });
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+socket.on('connected', data => {
+  console.log('CONNECTED', data);
+});
+
+socket.on('intel-event', event => {
+
+  const div = document.createElement('div');
+  div.className = 'item';
+
+  div.innerHTML = `
+  <div class="type">${event.type.toUpperCase()}</div>
+  <div class="title">${event.title}</div>
+  <div class="source">${event.source}</div>
+  `;
+
+  feed.prepend(div);
+
+  while(feed.children.length > 80){
+    feed.removeChild(feed.lastChild);
+  }
+
+  nodes.push(randomNode());
+
+  if(nodes.length > 120){
+    nodes.shift();
+  }
+
+});
+
+</script>
+
+</body>
+</html>
