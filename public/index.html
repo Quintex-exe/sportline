@@ -3,157 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FOOTINT SOCKET.IO LIVE</title>
+<title>FOOTINT LIVE</title>
 
+<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
+<script src="https://unpkg.com/globe.gl"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
-body{
+
+*{
 margin:0;
-background:#040705;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#020403;
 overflow:hidden;
 font-family:Arial,sans-serif;
 color:#d8ffe4;
+}
+
+#globeViz{
+position:fixed;
+inset:0;
+z-index:1;
 }
 
 #feed{
 position:fixed;
 right:0;
 top:0;
-width:340px;
+width:360px;
 height:100vh;
 overflow-y:auto;
-background:rgba(0,0,0,.55);
-backdrop-filter:blur(12px);
+padding:16px;
+background:rgba(0,0,0,.42);
+backdrop-filter:blur(14px);
+border-left:1px solid rgba(57,255,106,.14);
+z-index:20;
+}
+
+.feedItem{
+background:rgba(255,255,255,.03);
+border:1px solid rgba(57,255,106,.14);
+border-radius:18px;
 padding:14px;
-border-left:1px solid rgba(57,255,106,.18);
+margin-bottom:14px;
+animation:fadeIn .4s ease;
 }
 
-.item{
-padding:12px;
-margin-bottom:10px;
-border-radius:12px;
-background:rgba(255,255,255,.04);
-border:1px solid rgba(57,255,106,.12);
-}
-
-.type{
+.feedType{
 display:inline-block;
 padding:4px 8px;
 border-radius:999px;
 background:rgba(57,255,106,.12);
 color:#39ff6a;
 font-size:11px;
-margin-bottom:8px;
-}
-
-.title{
+margin-bottom:10px;
 font-weight:bold;
-margin-bottom:8px;
-line-height:1.4;
 }
 
-.source{
+.feedTitle{
+font-size:15px;
+font-weight:bold;
+line-height:1.4;
+margin-bottom:8px;
+}
+
+.feedSource{
 font-size:12px;
 opacity:.7;
 }
 
-#status{
+#logo{
 position:fixed;
-top:10px;
-left:10px;
-padding:12px 16px;
-border-radius:12px;
-background:rgba(0,0,0,.45);
-border:1px solid rgba(57,255,106,.14);
+top:18px;
+left:18px;
+z-index:30;
+font-size:38px;
+font-weight:900;
+letter-spacing:3px;
+color:#39ff6a;
 }
 
-canvas{
+#status{
 position:fixed;
-inset:0;
+bottom:20px;
+left:20px;
+z-index:30;
+padding:18px;
+border-radius:20px;
+background:rgba(0,0,0,.45);
+border:1px solid rgba(57,255,106,.16);
+min-width:220px;
 }
+
+.statRow{
+display:flex;
+justify-content:space-between;
+margin-top:12px;
+font-size:14px;
+}
+
+.statVal{
+color:#39ff6a;
+font-weight:bold;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
 </style>
 </head>
 <body>
 
-<div id="status">
-FOOTINT LIVE SOCKET.IO
+<div id="logo">
+FOOTINT
 </div>
 
-<canvas id="bg"></canvas>
+<div id="globeViz"></div>
 
 <div id="feed"></div>
+
+<div id="status">
+<div style="font-size:24px;font-weight:bold;color:#39ff6a;">
+LIVE INTEL
+</div>
+
+<div class="statRow">
+<span>Socket</span>
+<span class="statVal" id="socketStatus">CONNECTING</span>
+</div>
+
+<div class="statRow">
+<span>Feed Items</span>
+<span class="statVal" id="feedCount">0</span>
+</div>
+
+<div class="statRow">
+<span>Mode</span>
+<span class="statVal">OSINT</span>
+</div>
+</div>
 
 <script>
 
 const socket = io();
 
 const feed = document.getElementById('feed');
+const feedCount = document.getElementById('feedCount');
+const socketStatus = document.getElementById('socketStatus');
 
-const canvas = document.getElementById('bg');
-const ctx = canvas.getContext('2d');
+let totalFeeds = 0;
 
-function resize(){
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+const world = Globe()
+(document.getElementById('globeViz'))
+
+.globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+.backgroundColor('#020403')
+.showAtmosphere(true)
+.atmosphereColor('#39ff6a')
+.atmosphereAltitude(0.18);
+
+world.pointOfView({
+lat:20,
+lng:10,
+alt:2.2
+});
+
+const arcs = [];
+
+world
+.arcsData(arcs)
+.arcColor(()=>'#39ff6a')
+.arcDashLength(0.3)
+.arcDashGap(0.02)
+.arcDashAnimateTime(2000)
+.arcStroke(0.8);
+
+function addArc(){
+
+const startLat = (Math.random()*180)-90;
+const startLng = (Math.random()*360)-180;
+
+const endLat = (Math.random()*180)-90;
+const endLng = (Math.random()*360)-180;
+
+arcs.push({
+startLat,
+startLng,
+endLat,
+endLng
+});
+
+if(arcs.length > 40){
+arcs.shift();
 }
-resize();
-addEventListener('resize', resize);
 
-const nodes = [];
+world.arcsData([...arcs]);
 
-function randomNode(){
-  return {
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height
-  };
 }
 
-function draw(){
+setInterval(addArc,1200);
 
-  ctx.fillStyle = 'rgba(4,7,5,0.12)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+socket.on('connect', ()=>{
 
-  nodes.forEach(n=>{
+socketStatus.innerText = 'LIVE';
 
-    ctx.beginPath();
-    ctx.arc(n.x,n.y,3,0,Math.PI*2);
-    ctx.fillStyle='#39ff6a';
-    ctx.fill();
-
-  });
-
-  requestAnimationFrame(draw);
-}
-
-draw();
-
-socket.on('connected', data => {
-  console.log('CONNECTED', data);
 });
 
 socket.on('intel-event', event => {
 
-  const div = document.createElement('div');
-  div.className = 'item';
+totalFeeds++;
 
-  div.innerHTML = `
-  <div class="type">${event.type.toUpperCase()}</div>
-  <div class="title">${event.title}</div>
-  <div class="source">${event.source}</div>
-  `;
+feedCount.innerText = totalFeeds;
 
-  feed.prepend(div);
+const item = document.createElement('div');
 
-  while(feed.children.length > 80){
-    feed.removeChild(feed.lastChild);
-  }
+item.className = 'feedItem';
 
-  nodes.push(randomNode());
+item.innerHTML = `
+<div class="feedType">${event.type || 'EVENT'}</div>
+<div class="feedTitle">${event.title}</div>
+<div class="feedSource">${event.source}</div>
+`;
 
-  if(nodes.length > 120){
-    nodes.shift();
-  }
+feed.prepend(item);
+
+if(feed.children.length > 80){
+feed.removeChild(feed.lastChild);
+}
+
+addArc();
 
 });
 
