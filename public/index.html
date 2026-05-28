@@ -1625,6 +1625,45 @@ const TYPE_COLORS = {
 };
 
 
+// ── GeoJSON country borders ──────────────────────────────────────────────────
+
+let geoData = null;
+
+fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+  .then(r => r.json())
+  .then(data => { geoData = data; })
+  .catch(() => {});
+
+function drawCountries() {
+  if (!geoData) return;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(57,255,106,0.18)';
+  ctx.lineWidth = 0.6;
+  ctx.setLineDash([]);
+  for (const feature of geoData.features) {
+    const geom = feature.geometry;
+    const polys = geom.type === 'Polygon'
+      ? [geom.coordinates]
+      : geom.type === 'MultiPolygon'
+        ? geom.coordinates
+        : [];
+    for (const poly of polys) {
+      for (const ring of poly) {
+        ctx.beginPath();
+        let first = true;
+        for (const [lng, lat] of ring) {
+          const pr = project(latLngTo3D(lat, lng));
+          if (pr.depth < 0) { first = true; continue; }
+          if (first) { ctx.moveTo(pr.sx, pr.sy); first = false; }
+          else ctx.lineTo(pr.sx, pr.sy);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
 // ── REAL WORLD INTEL SYSTEM ─────────────────────────────
 
 const RSS_URL =
@@ -1700,6 +1739,8 @@ function guessNode(title){
 
 let rotY = 0.5;
 let rotX = 0.2;
+let targetRotY = 0.5;
+let targetRotX = 0.2;
 let autoSpin = true;
 let isDragging = false;
 let lastMX = 0, lastMY = 0;
@@ -1795,6 +1836,9 @@ function drawGlobe() {
   }
 
   ctx.restore();
+
+  // Country borders
+  drawCountries();
 
   // Arcs
   for (const arc of activeArcs) {
@@ -1892,6 +1936,10 @@ function drawGlobe() {
 function tick() {
   requestAnimationFrame(tick);
   if (autoSpin) rotY += 0.0015;
+
+  // Smooth pan toward region target
+  rotX += (targetRotX - rotX) * 0.06;
+  rotY += (targetRotY - rotY) * 0.06;
 
   for (const arc of activeArcs) {
     if (arc.progress < 1) arc.progress += 0.007;
@@ -2179,7 +2227,7 @@ async function fetchRealNews(){
     });
 
   }catch(err){
-    console.log('RSS ERROR', err);
+    // RSS fetch unavailable in this environment — simulated feed active
   }
 }
 
@@ -2741,8 +2789,12 @@ setInterval(fetchRealNews, 300000);
 
 
 // ── SOCKET.IO LIVE FEED CACHE ─────────────────────────────
+// Safe stub — works with a live Node server (socket.io loaded)
+// and as a standalone HTML file (io undefined).
 
-const socket = io();
+const socket = (typeof io !== 'undefined')
+  ? io()
+  : { on: () => {} };
 
 function renderCachedFeed(event){
 
