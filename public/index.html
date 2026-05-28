@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOOTINT LIVE</title>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
@@ -24,11 +23,48 @@ font-family:Arial,sans-serif;
 color:#d8ffe4;
 }
 
-#globeViz{
+/* BACKGROUND */
+
+#background{
 position:fixed;
 inset:0;
 z-index:1;
+overflow:hidden;
+background:
+radial-gradient(circle at center,
+rgba(57,255,106,.08),
+transparent 60%),
+#020403;
 }
+
+/* GRID */
+
+#grid{
+position:absolute;
+inset:0;
+background-image:
+linear-gradient(rgba(57,255,106,.04) 1px, transparent 1px),
+linear-gradient(90deg, rgba(57,255,106,.04) 1px, transparent 1px);
+background-size:40px 40px;
+}
+
+/* BIG LOGO */
+
+#bgLogo{
+position:absolute;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:140px;
+font-weight:900;
+letter-spacing:16px;
+color:#39ff6a;
+opacity:.05;
+user-select:none;
+}
+
+/* FEED */
 
 #feed{
 position:fixed;
@@ -38,9 +74,9 @@ width:360px;
 height:100vh;
 overflow-y:auto;
 padding:16px;
-background:rgba(0,0,0,.42);
+background:rgba(0,0,0,.45);
 backdrop-filter:blur(14px);
-border-left:1px solid rgba(57,255,106,.14);
+border-left:1px solid rgba(57,255,106,.12);
 z-index:20;
 }
 
@@ -76,6 +112,8 @@ font-size:12px;
 opacity:.7;
 }
 
+/* LOGO */
+
 #logo{
 position:fixed;
 top:18px;
@@ -86,6 +124,8 @@ font-weight:900;
 letter-spacing:3px;
 color:#39ff6a;
 }
+
+/* STATUS */
 
 #status{
 position:fixed;
@@ -111,6 +151,20 @@ color:#39ff6a;
 font-weight:bold;
 }
 
+/* FLOATING DOTS */
+
+.dot{
+position:absolute;
+width:4px;
+height:4px;
+border-radius:50%;
+background:#39ff6a;
+box-shadow:0 0 12px #39ff6a;
+opacity:.5;
+}
+
+/* ANIMATION */
+
 @keyframes fadeIn{
 from{
 opacity:0;
@@ -126,39 +180,56 @@ transform:translateY(0);
 </head>
 <body>
 
+<div id="background">
+
+<div id="grid"></div>
+
+<div id="bgLogo">
+FOOTINT
+</div>
+
+</div>
+
 <div id="logo">
 FOOTINT
 </div>
 
-<div id="globeViz"></div>
-
 <div id="feed"></div>
 
 <div id="status">
-<div style="font-size:24px;font-weight:bold;color:#39ff6a;">
+
+<div style="
+font-size:24px;
+font-weight:bold;
+color:#39ff6a;
+">
 LIVE INTEL
 </div>
 
 <div class="statRow">
 <span>Socket</span>
-<span class="statVal" id="socketStatus">CONNECTING</span>
+<span class="statVal" id="socketStatus">
+CONNECTING
+</span>
 </div>
 
 <div class="statRow">
 <span>Feed Items</span>
-<span class="statVal" id="feedCount">0</span>
+<span class="statVal" id="feedCount">
+0
+</span>
 </div>
 
 <div class="statRow">
 <span>Mode</span>
-<span class="statVal">OSINT</span>
+<span class="statVal">
+OSINT
+</span>
 </div>
+
 </div>
 
 <script>
-
-console.log("JS RUNNING");
-console.log("GLOBE:", typeof Globe);
 
 const socket = io();
 
@@ -168,55 +239,55 @@ const socketStatus = document.getElementById('socketStatus');
 
 let totalFeeds = 0;
 
-const world = Globe()
-(document.getElementById('globeViz'))
+/* FLOATING INTEL DOTS */
 
-.globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
-.backgroundColor('#020403')
-.showAtmosphere(true)
-.atmosphereColor('#39ff6a')
-.atmosphereAltitude(0.18);
+const dots = [];
 
-world.pointOfView({
-lat:20,
-lng:10,
-alt:2.2
+for(let i=0;i<80;i++){
+
+const dot = document.createElement('div');
+
+dot.className = 'dot';
+
+document.body.appendChild(dot);
+
+dots.push({
+el:dot,
+x:Math.random()*window.innerWidth,
+y:Math.random()*window.innerHeight,
+vx:(Math.random()-.5)*0.4,
+vy:(Math.random()-.5)*0.4
 });
-
-const arcs = [];
-
-world
-.arcsData(arcs)
-.arcColor(()=>'#39ff6a')
-.arcDashLength(0.3)
-.arcDashGap(0.02)
-.arcDashAnimateTime(2000)
-.arcStroke(0.8);
-
-function addArc(){
-
-const startLat = (Math.random()*180)-90;
-const startLng = (Math.random()*360)-180;
-
-const endLat = (Math.random()*180)-90;
-const endLng = (Math.random()*360)-180;
-
-arcs.push({
-startLat,
-startLng,
-endLat,
-endLng
-});
-
-if(arcs.length > 40){
-arcs.shift();
-}
-
-world.arcsData([...arcs]);
 
 }
 
-setInterval(addArc,1200);
+function animateDots(){
+
+for(const d of dots){
+
+d.x += d.vx;
+d.y += d.vy;
+
+if(d.x < 0 || d.x > window.innerWidth){
+d.vx *= -1;
+}
+
+if(d.y < 0 || d.y > window.innerHeight){
+d.vy *= -1;
+}
+
+d.el.style.left = d.x + 'px';
+d.el.style.top = d.y + 'px';
+
+}
+
+requestAnimationFrame(animateDots);
+
+}
+
+animateDots();
+
+/* SOCKET EVENTS */
 
 socket.on('connect', ()=>{
 
@@ -235,9 +306,17 @@ const item = document.createElement('div');
 item.className = 'feedItem';
 
 item.innerHTML = `
-<div class="feedType">${event.type || 'EVENT'}</div>
-<div class="feedTitle">${event.title}</div>
-<div class="feedSource">${event.source}</div>
+<div class="feedType">
+${event.type || 'EVENT'}
+</div>
+
+<div class="feedTitle">
+${event.title}
+</div>
+
+<div class="feedSource">
+${event.source}
+</div>
 `;
 
 feed.prepend(item);
@@ -246,11 +325,40 @@ if(feed.children.length > 80){
 feed.removeChild(feed.lastChild);
 }
 
-addArc();
+flashIntel();
 
 });
+
+/* SCREEN FLASH */
+
+function flashIntel(){
+
+const flash = document.createElement('div');
+
+Object.assign(flash.style,{
+position:'fixed',
+inset:'0',
+background:'radial-gradient(circle,#39ff6a22 0%,transparent 70%)',
+pointerEvents:'none',
+opacity:'1',
+transition:'opacity .6s ease',
+zIndex:'5'
+});
+
+document.body.appendChild(flash);
+
+requestAnimationFrame(()=>{
+flash.style.opacity='0';
+});
+
+setTimeout(()=>{
+flash.remove();
+},600);
+
+}
 
 </script>
 
 </body>
 </html>
+```
