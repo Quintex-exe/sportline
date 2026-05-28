@@ -2265,59 +2265,6 @@ function injectRealEvent({
 
 
 
-// ── Event spawner ─────────────────────────────────────────────────────────────
-
-function spawnEvent() {
-  const group = ALERTS[Math.floor(Math.random() * ALERTS.length)];
-  const type  = group.type;
-  const body  = group.templates[Math.floor(Math.random() * group.templates.length)];
-  const from  = NODES[Math.floor(Math.random() * NODES.length)];
-  let to = NODES[Math.floor(Math.random() * NODES.length)];
-  while (to.id === from.id) to = NODES[Math.floor(Math.random() * NODES.length)];
-
-  activeArcs.push({ from, to, type, progress: 0 });
-
-  nodeAlerts[from.id] = Math.min(4, (nodeAlerts[from.id] || 0) + 1);
-  setTimeout(() => { if (nodeAlerts[from.id]) nodeAlerts[from.id]--; }, 5000);
-
-  totalEvents++;
-  feedCount++;
-  document.getElementById('event-count').textContent = `${totalEvents} events tracked`;
-  document.getElementById('feed-count').textContent = feedCount;
-
-  const now = new Date();
-  const ts = `${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}:${String(now.getUTCSeconds()).padStart(2,'0')}`;
-
-  const list = document.getElementById('alert-list');
-  const item = document.createElement('div');
-  item.className = 'alert-item';
-  item.setAttribute('data-type', type);
-
-  item.innerHTML =
-    `<span class="alert-badge badge-${type}">${type.toUpperCase()}</span><br>` +
-    `<div class="alert-route">${from.name}<span class="arrow">→</span>${to.name}</div>` +
-    `<div class="alert-body">${body}</div>` +
-    `<div class="alert-time">${ts} UTC</div>`;
-  list.insertBefore(item, list.firstChild);
-
-  applyFeedFilter();
-
-  while (list.children.length > 40) list.removeChild(list.lastChild);
-}
-
-// Burst on load
-spawnEvent();
-setTimeout(spawnEvent, 600);
-setTimeout(spawnEvent, 1400);
-setTimeout(spawnEvent, 2200);
-
-// Ongoing cadence
-setInterval(() => {
-  spawnEvent();
-  if (Math.random() < 0.45) setTimeout(spawnEvent, 700);
-}, 3200);
-
-
 // Tactical counters
 setInterval(() => {
   const matches = document.getElementById('ops-matches');
