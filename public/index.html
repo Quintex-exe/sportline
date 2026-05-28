@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FOOTINT LIVE</title>
 
-<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
-<script src="https://unpkg.com/globe.gl"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
@@ -157,6 +157,9 @@ LIVE INTEL
 
 <script>
 
+console.log("JS RUNNING");
+console.log("GLOBE:", typeof Globe);
+
 const socket = io();
 
 const feed = document.getElementById('feed');
@@ -168,7 +171,7 @@ let totalFeeds = 0;
 const world = Globe()
 (document.getElementById('globeViz'))
 
-.globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+.globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg')
 .backgroundColor('#020403')
 .showAtmosphere(true)
 .atmosphereColor('#39ff6a')
