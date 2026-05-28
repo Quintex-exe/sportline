@@ -1615,12 +1615,85 @@ const ALERTS = [
 
 
 const TYPE_COLORS = {
+
   transfer: '#39ff6a',
   injury:   '#ff6b6b',
   signing:  '#5af5ff',
   scout:    '#f9c74f',
   match:    '#d0aaff',
 };
+
+
+// ── REAL WORLD INTEL SYSTEM ─────────────────────────────
+
+const RSS_URL =
+'https://news.google.com/rss/search?q=football+transfer&hl=en';
+
+const RSS_PROXY =
+'https://api.rss2json.com/v1/api.json?rss_url=';
+
+const seenUrls = new Set();
+
+const CITY_KEYWORDS = {
+  lon:['arsenal','chelsea','tottenham','west ham','london'],
+  man:['manchester','man utd','man city'],
+  mad:['real madrid','atletico','madrid'],
+  bar:['barcelona','barca'],
+  mun:['bayern','munich'],
+  par:['psg','paris'],
+  mil:['milan','inter','juventus'],
+  sao:['palmeiras','sao paulo','santos'],
+  bue:['boca','river plate','argentina'],
+  dub:['al nassr','al hilal','saudi'],
+  tok:['j league','tokyo','japan'],
+};
+
+function classifyArticle(title){
+
+  const t = title.toLowerCase();
+
+  if(
+    t.includes('injur') ||
+    t.includes('doubt') ||
+    t.includes('ruled out')
+  ) return 'injury';
+
+  if(
+    t.includes('sign') ||
+    t.includes('contract') ||
+    t.includes('agreement')
+  ) return 'signing';
+
+  if(
+    t.includes('scout') ||
+    t.includes('monitor') ||
+    t.includes('tracking')
+  ) return 'scout';
+
+  if(
+    t.includes('transfer') ||
+    t.includes('bid') ||
+    t.includes('linked') ||
+    t.includes('fee')
+  ) return 'transfer';
+
+  return 'match';
+}
+
+function guessNode(title){
+
+  const t = title.toLowerCase();
+
+  for(const [id,words] of Object.entries(CITY_KEYWORDS)){
+
+    if(words.some(w => t.includes(w))){
+      return NODES.find(n => n.id === id);
+    }
+  }
+
+  return NODES[Math.floor(Math.random()*NODES.length)];
+}
+
 
 // ── Globe state ──────────────────────────────────────────────────────────────
 
@@ -2063,6 +2136,133 @@ function updateClock() {
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+
+async function fetchRealNews(){
+
+  try{
+
+    const res = await fetch(
+      RSS_PROXY + encodeURIComponent(RSS_URL)
+    );
+
+    const data = await res.json();
+
+    if(!data.items) return;
+
+    data.items.slice(0,8).forEach(article => {
+
+      if(seenUrls.has(article.link)) return;
+
+      seenUrls.add(article.link);
+
+      const from = guessNode(article.title);
+
+      let to =
+        NODES[Math.floor(Math.random()*NODES.length)];
+
+      while(to.id === from.id){
+        to = NODES[Math.floor(Math.random()*NODES.length)];
+      }
+
+      const type = classifyArticle(article.title);
+
+      injectRealEvent({
+        type,
+        body:article.title,
+        from,
+        to,
+        url:article.link
+      });
+
+    });
+
+  }catch(err){
+    console.log('RSS ERROR', err);
+  }
+}
+
+function injectRealEvent({
+  type,
+  body,
+  from,
+  to,
+  url
+}){
+
+  activeArcs.push({
+    from,
+    to,
+    type,
+    progress:0
+  });
+
+  nodeAlerts[from.id] =
+    Math.min(4,(nodeAlerts[from.id]||0)+1);
+
+  setTimeout(()=>{
+    if(nodeAlerts[from.id]) nodeAlerts[from.id]--;
+  },5000);
+
+  totalEvents++;
+  feedCount++;
+
+  document.getElementById('event-count')
+    .textContent =
+    `${totalEvents} events tracked`;
+
+  document.getElementById('feed-count')
+    .textContent = feedCount;
+
+  const now = new Date();
+
+  const ts =
+    `${String(now.getUTCHours()).padStart(2,'0')}:` +
+    `${String(now.getUTCMinutes()).padStart(2,'0')}:` +
+    `${String(now.getUTCSeconds()).padStart(2,'0')}`;
+
+  const list =
+    document.getElementById('alert-list');
+
+  const item = document.createElement('div');
+
+  item.className = 'alert-item';
+
+  item.setAttribute('data-type', type);
+
+  item.innerHTML =
+    `<span class="alert-badge badge-${type}">
+      ${type.toUpperCase()}
+    </span><br>
+
+    <div class="alert-route">
+      ${from.name}
+      <span class="arrow">→</span>
+      ${to.name}
+    </div>
+
+    <div class="alert-body">
+      <a href="${url}"
+         target="_blank"
+         style="color:#7a9e88;text-decoration:none;">
+         ${body}
+      </a>
+    </div>
+
+    <div class="alert-time">
+      ${ts} UTC
+    </div>`;
+
+  list.insertBefore(item,list.firstChild);
+
+  applyFeedFilter();
+
+  while(list.children.length > 40){
+    list.removeChild(list.lastChild);
+  }
+}
+
+
 
 // ── Event spawner ─────────────────────────────────────────────────────────────
 
@@ -2587,6 +2787,9 @@ regionToggle.addEventListener('click', ()=>{
 
 // initialize
 focusRegion('global');
+fetchRealNews();
+setInterval(fetchRealNews, 300000);
+
 // ── Go ───────────────────────────────────────────────────────────────────────
 tick();
 </script>
