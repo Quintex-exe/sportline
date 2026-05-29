@@ -1,22 +1,26 @@
 const clubs = require('./clubs.json');
 
+const clubKeys =
+  Object.keys(clubs)
+    .sort((a,b) => b.length - a.length);
+
 function detectClub(title = '') {
 
-  const text = title.toLowerCase();
+  const text = String(title).toLowerCase();
 
-  for (const club of Object.keys(clubs)) {
+  for (const club of clubKeys) {
 
-    if (text.includes(club)) {
+    if (!text.includes(club)) continue;
 
-      return {
-        club,
-        city: clubs[club].city,
-        lat: clubs[club].lat,
-        lng: clubs[club].lng,
-        region: clubs[club].region
-      };
+    const data = clubs[club];
 
-    }
+    return {
+      club,
+      city: data.city || null,
+      lat: Number(data.lat) || null,
+      lng: Number(data.lng) || null,
+      region: data.region || 'global'
+    };
   }
 
   return null;
