@@ -165,5 +165,265 @@
     "lat":30.0444,
     "lng":31.2357,
     "region":"africa"
+  },
+
+  {
+  "man utd":{
+    "city":"Manchester",
+    "lat":53.4808,
+    "lng":-2.2426,
+    "region":"europe"
+  },
+
+  "man united":{
+    "city":"Manchester",
+    "lat":53.4808,
+    "lng":-2.2426,
+    "region":"europe"
+  },
+
+  "man city":{
+    "city":"Manchester",
+    "lat":53.4808,
+    "lng":-2.2426,
+    "region":"europe"
+  },
+
+  "ajax":{
+    "city":"Amsterdam",
+    "lat":52.3676,
+    "lng":4.9041,
+    "region":"europe"
+  },
+
+  "benfica":{
+    "city":"Lisbon",
+    "lat":38.7223,
+    "lng":-9.1393,
+    "region":"europe"
+  },
+
+  "sporting":{
+    "city":"Lisbon",
+    "lat":38.7223,
+    "lng":-9.1393,
+    "region":"europe"
+  },
+
+  "porto":{
+    "city":"Porto",
+    "lat":41.1579,
+    "lng":-8.6291,
+    "region":"europe"
+  },
+
+  "napoli":{
+    "city":"Naples",
+    "lat":40.8518,
+    "lng":14.2681,
+    "region":"europe"
+  },
+
+  "roma":{
+    "city":"Rome",
+    "lat":41.9028,
+    "lng":12.4964,
+    "region":"europe"
+  },
+
+  "lazio":{
+    "city":"Rome",
+    "lat":41.9028,
+    "lng":12.4964,
+    "region":"europe"
+  },
+
+  "sevilla":{
+    "city":"Seville",
+    "lat":37.3891,
+    "lng":-5.9845,
+    "region":"europe"
+  },
+
+  "valencia":{
+    "city":"Valencia",
+    "lat":39.4699,
+    "lng":-0.3763,
+    "region":"europe"
+  },
+
+  "marseille":{
+    "city":"Marseille",
+    "lat":43.2965,
+    "lng":5.3698,
+    "region":"europe"
+  },
+
+  "lyon":{
+    "city":"Lyon",
+    "lat":45.7640,
+    "lng":4.8357,
+    "region":"europe"
+  },
+
+  "monaco":{
+    "city":"Monaco",
+    "lat":43.7384,
+    "lng":7.4246,
+    "region":"europe"
+  },
+
+  "rb leipzig":{
+    "city":"Leipzig",
+    "lat":51.3397,
+    "lng":12.3731,
+    "region":"europe"
+  },
+
+  "leverkusen":{
+    "city":"Leverkusen",
+    "lat":51.0459,
+    "lng":7.0192,
+    "region":"europe"
+  },
+
+  "galatasaray":{
+    "city":"Istanbul",
+    "lat":41.0082,
+    "lng":28.9784,
+    "region":"europe"
+  },
+
+  "fenerbahce":{
+    "city":"Istanbul",
+    "lat":41.0082,
+    "lng":28.9784,
+    "region":"europe"
+  },
+
+  "celtic":{
+    "city":"Glasgow",
+    "lat":55.8642,
+    "lng":-4.2518,
+    "region":"europe"
+  },
+
+  "rangers":{
+    "city":"Glasgow",
+    "lat":55.8642,
+    "lng":-4.2518,
+    "region":"europe"
+  },
+
+  "club america":{
+    "city":"Mexico City",
+    "lat":19.4326,
+    "lng":-99.1332,
+    "region":"northamerica"
+  },
+
+  "tigres":{
+    "city":"Monterrey",
+    "lat":25.6866,
+    "lng":-100.3161,
+    "region":"northamerica"
+  },
+
+  "monterrey":{
+    "city":"Monterrey",
+    "lat":25.6866,
+    "lng":-100.3161,
+    "region":"northamerica"
+  },
+
+  "al ittihad":{
+    "city":"Jeddah",
+    "lat":21.4858,
+    "lng":39.1925,
+    "region":"asia"
+  },
+
+  "urawa reds":{
+    "city":"Saitama",
+    "lat":35.8617,
+    "lng":139.6455,
+    "region":"asia"
+  },
+
+  "kawasaki frontale":{
+    "city":"Kawasaki",
+    "lat":35.5308,
+    "lng":139.7036,
+    "region":"asia"
+  },
+
+  "champions league":{
+    "city":"Nyon",
+    "lat":46.3833,
+    "lng":6.2333,
+    "region":"europe"
+  },
+
+  "premier league":{
+    "city":"London",
+    "lat":51.5074,
+    "lng":-0.1278,
+    "region":"europe"
+  },
+
+  "la liga":{
+    "city":"Madrid",
+    "lat":40.4168,
+    "lng":-3.7038,
+    "region":"europe"
+  },
+
+  "bundesliga":{
+    "city":"Frankfurt",
+    "lat":50.1109,
+    "lng":8.6821,
+    "region":"europe"
+  },
+
+  "serie a":{
+    "city":"Milan",
+    "lat":45.4642,
+    "lng":9.1900,
+    "region":"europe"
+  },
+
+  "ligue 1":{
+    "city":"Paris",
+    "lat":48.8566,
+    "lng":2.3522,
+    "region":"europe"
+  },
+
+  "mls":{
+    "city":"New York",
+    "lat":40.7128,
+    "lng":-74.0060,
+    "region":"northamerica"
+  },
+
+  "libertadores":{
+    "city":"Buenos Aires",
+    "lat":-34.6037,
+    "lng":-58.3816,
+    "region":"southamerica"
+  },
+
+  "afc champions league":{
+    "city":"Kuala Lumpur",
+    "lat":3.1390,
+    "lng":101.6869,
+    "region":"asia"
+  },
+
+  "caf champions league":{
+    "city":"Cairo",
+    "lat":30.0444,
+    "lng":31.2357,
+    "region":"africa"
   }
 }
