@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const Parser = require('rss-parser');
 const cors = require('cors');
+const { detectClub } = require('./geoMapper');
 
 const app = express();
 const server = http.createServer(app);
@@ -186,12 +187,20 @@ async function pullFeeds() {
 
         sent.add(item.link);
 
+        const clubData = detectClub(item.title);
+
         const payload = {
           title: item.title,
           body: item.title,
           source: feed.title || 'Feed',
           type: classify(item.title),
-          region: detectRegion(item.title),
+
+          club: clubData?.club || null,
+          city: clubData?.city || null,
+          lat: clubData?.lat || null,
+          lng: clubData?.lng || null,
+
+          region: clubData?.region || detectRegion(item.title),
           url: item.link,
           link: item.link,
           timestamp: Date.now()
