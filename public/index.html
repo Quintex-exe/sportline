@@ -1935,11 +1935,15 @@ function drawGlobe() {
 
 function tick() {
   requestAnimationFrame(tick);
-  if (autoSpin) rotY += 0.0015;
+  if(autoSpin){
+  rotY += 0.0018;
+  targetRotY = rotY;
+  targetRotX = rotX;
+}
 
   // Smooth pan toward region target
-  rotX += (targetRotX - rotX) * 0.06;
-  rotY += (targetRotY - rotY) * 0.06;
+  if(!isDragging){ rotX += (targetRotX - rotX) * 0.02; }
+  if(!isDragging){ rotY += (targetRotY - rotY) * 0.02; }
 
   for (const arc of activeArcs) {
     if (arc.progress < 1) arc.progress += 0.007;
@@ -2713,6 +2717,7 @@ const REGION_CONFIG = {
 };
 
 let baseRadius = R;
+window.addEventListener('resize',()=>{baseRadius=R;});
 
 function applyRegionalFeed(region){
 
