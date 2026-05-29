@@ -1,8 +1,20 @@
 const clubs = require('./clubs.json');
 
-const clubKeys =
-  Object.keys(clubs)
-    .sort((a,b) => b.length - a.length);
+/*
+  Match longest names first.
+
+  Example:
+  "manchester united"
+  should match before
+  "manchester"
+
+  "inter miami"
+  should match before
+  "miami"
+*/
+
+const clubKeys = Object.keys(clubs)
+  .sort((a, b) => b.length - a.length);
 
 function detectClub(title = '') {
 
@@ -16,10 +28,21 @@ function detectClub(title = '') {
 
     return {
       club,
+
       city: data.city || null,
-      lat: Number(data.lat) || null,
-      lng: Number(data.lng) || null,
-      region: data.region || 'global'
+
+      lat:
+        typeof data.lat === 'number'
+          ? data.lat
+          : null,
+
+      lng:
+        typeof data.lng === 'number'
+          ? data.lng
+          : null,
+
+      region:
+        data.region || 'global'
     };
   }
 
