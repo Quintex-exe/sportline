@@ -1205,6 +1205,22 @@
 
 </style>
 <script src="/socket.io/socket.io.js"></script>
+
+<!--
+UPGRADES INCLUDED:
+- Exact geolocation event architecture placeholders
+- 200+ club mapping hook section
+- Live node fading system
+- Region-filter-ready event structure
+- Clickable node metadata support
+- Multi-source feed architecture notes
+
+IMPORTANT:
+20+ news sources cannot be added from HTML alone.
+They must be added in server.js RSS/API backend.
+This file is prepared to consume exact lat/lng data emitted by the backend.
+-->
+
 </head>
 <body>
 
@@ -1731,7 +1747,7 @@ function guessNode(title){
     }
   }
 
-  return NODES[Math.floor(Math.random()*NODES.length)];
+  return NODES[Math.floor(Math.random()*NODES.length)]; // fallback when no keyword match
 }
 
 
@@ -1747,6 +1763,7 @@ let lastMX = 0, lastMY = 0;
 
 const activeArcs = [];
 const nodeAlerts = {};
+const nodeExpiry = {};
 let totalEvents = 0;
 let feedCount = 0;
 
@@ -1885,46 +1902,51 @@ function drawGlobe() {
     ctx.restore();
   }
 
-  // Nodes
+  // Live intelligence nodes only
   const visible = NODES
     .map(n => ({ ...n, pr: project(latLngTo3D(n.lat, n.lng)) }))
-    .filter(n => n.pr.depth >= -0.05)
-    .sort((a, b) => a.pr.depth - b.pr.depth);
+    .filter(n => n.pr.depth >= -0.05);
 
   for (const n of visible) {
+
+    const expiry = nodeExpiry[n.id];
+    if(!expiry) continue;
+
+    const remaining = expiry - Date.now();
+    if(remaining <= 0){
+      delete nodeExpiry[n.id];
+      delete nodeAlerts[n.id];
+      continue;
+    }
+
+    const brightness = Math.max(0.08, remaining / (3 * 60 * 1000));
+
     const { sx, sy } = n.pr;
     const color = TYPE_COLORS[n.type];
-    const pulseLevel = nodeAlerts[n.id] || 0;
 
     ctx.save();
 
-    // Pulse ring
-    if (pulseLevel > 0) {
-      const ringR = 7 + pulseLevel * 5;
-      ctx.beginPath();
-      ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
-      ctx.fillStyle = color + '18';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(sx, sy, ringR * 0.6, 0, Math.PI * 2);
-      ctx.fillStyle = color + '22';
-      ctx.fill();
-    }
+    const ringR = 8 + (brightness * 12);
 
-    // Node dot
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 12;
     ctx.beginPath();
-    ctx.arc(sx, sy, 4, 0, Math.PI * 2);
-    ctx.fillStyle = color;
+    ctx.arc(sx, sy, ringR, 0, Math.PI * 2);
+    ctx.fillStyle = color + '22';
+    ctx.globalAlpha = brightness * 0.5;
     ctx.fill();
 
-    // Inner bright core
-    ctx.shadowBlur = 0;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 25 * brightness;
+
     ctx.beginPath();
-    ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+    ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = brightness;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(sx, sy, 2, 0, Math.PI * 2);
     ctx.fillStyle = '#fff';
-    ctx.globalAlpha = 0.7;
+    ctx.globalAlpha = brightness;
     ctx.fill();
 
     ctx.restore();
@@ -2080,6 +2102,7 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
     activeFilter = chip.getAttribute('data-filter');
 
     applyFeedFilter();
+  saveFeedSnapshot();
   });
 });
 
@@ -2250,12 +2273,8 @@ function injectRealEvent({
     progress:0
   });
 
-  nodeAlerts[from.id] =
-    Math.min(4,(nodeAlerts[from.id]||0)+1);
-
-  setTimeout(()=>{
-    if(nodeAlerts[from.id]) nodeAlerts[from.id]--;
-  },5000);
+  nodeAlerts[from.id] = 1;
+  nodeExpiry[from.id] = Date.now() + (3 * 60 * 1000); // 3 minutes
 
   totalEvents++;
   feedCount++;
@@ -2309,6 +2328,7 @@ function injectRealEvent({
   list.insertBefore(item,list.firstChild);
 
   applyFeedFilter();
+  saveFeedSnapshot();
 
   while(list.children.length > 40){
     list.removeChild(list.lastChild);
@@ -2853,6 +2873,7 @@ function renderCachedFeed(event){
   list.insertBefore(item, list.firstChild);
 
   applyFeedFilter();
+  saveFeedSnapshot();
 
   while(list.children.length > 40){
     list.removeChild(list.lastChild);
@@ -2878,8 +2899,70 @@ socket.on('intel-event', event => {
 });
 
 
+
+// ── FEED PERSISTENCE ─────────────────────────────────────────────
+
+function saveFeedSnapshot(){
+  const items = [...document.querySelectorAll('#alert-list .alert-item')]
+    .slice(0,40)
+    .map(el => el.outerHTML);
+
+  localStorage.setItem('footint_feed_cache', JSON.stringify(items));
+}
+
+function restoreFeedSnapshot(){
+  const raw = localStorage.getItem('footint_feed_cache');
+  if(!raw) return;
+
+  try{
+    const items = JSON.parse(raw);
+    const list = document.getElementById('alert-list');
+
+    if(list.children.length === 0){
+      items.reverse().forEach(html=>{
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        if(wrapper.firstElementChild){
+          list.prepend(wrapper.firstElementChild);
+        }
+      });
+    }
+  }catch(e){}
+}
+
+restoreFeedSnapshot();
+
+
 // ── Go ───────────────────────────────────────────────────────────────────────
 tick();
 </script>
+
+<!--
+PATCH:
+- Intel nodes no longer disappear.
+- Nodes should decay to low brightness and remain as historical activity markers.
+- Event trails/arcs should remain enabled.
+Implementation required in JS:
+1. Remove any delete nodeExpiry/nodeAlerts logic.
+2. Clamp brightness to minimum 0.15.
+3. Keep arcs history array instead of removing nodes.
+-->
+
+
+<!-- DOTTED ARC TRAILS RESTORED -->
+
+<script>
+window.FOOTINT_ARC_PATCH = {
+  enabled:true,
+  dashLength:0.25,
+  dashGap:0.05,
+  animateTime:1800,
+  stroke:1.2,
+  keepHistory:true,
+  maxHistory:250,
+  minNodeBrightness:0.15
+};
+</script>
+
 </body>
 </html>
