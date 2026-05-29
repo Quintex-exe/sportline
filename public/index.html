@@ -2894,6 +2894,32 @@ socket.on('initial-feed', feeds => {
 // live incoming feed
 socket.on('intel-event', event => {
 
+  if(event.lat && event.lng){
+
+    const nodeId = 'live_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+
+    NODES.push({
+      id: nodeId,
+      name: event.city || event.club || 'LIVE',
+      club: event.club || 'LIVE INTEL',
+      lat: Number(event.lat),
+      lng: Number(event.lng),
+      type: event.type || 'match'
+    });
+
+    nodeAlerts[nodeId] = 1;
+    nodeExpiry[nodeId] = Date.now() + (10 * 60 * 1000);
+
+    const sourceNode = NODES[Math.floor(Math.random() * NODES.length)];
+
+    activeArcs.push({
+      from: sourceNode,
+      to: NODES[NODES.length - 1],
+      type: event.type || 'match',
+      progress: 0
+    });
+  }
+
   renderCachedFeed(event);
 
 });
