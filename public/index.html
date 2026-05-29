@@ -2990,5 +2990,365 @@ window.FOOTINT_ARC_PATCH = {
 };
 </script>
 
+
+
+<!-- ── PLAYER MARKET VALUE WIDGET ───────────────────────────── -->
+<style>
+  #player-market {
+    position: fixed;
+    bottom: 58px;
+    left: 200px;
+    width: 256px;
+    z-index: 500;
+    background: rgba(3,10,8,0.96);
+    border: 1px solid rgba(57,255,106,0.14);
+    border-radius: 8px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 0 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(57,255,106,0.04) inset;
+    font-family: 'Share Tech Mono', monospace;
+    user-select: none;
+    transition: box-shadow .2s ease;
+  }
+
+  #player-market:hover {
+    box-shadow: 0 0 40px rgba(0,0,0,0.55), 0 0 18px rgba(57,255,106,0.07);
+  }
+
+  #player-market.dragging {
+    box-shadow: 0 0 50px rgba(0,0,0,0.7), 0 0 24px rgba(57,255,106,0.12);
+    opacity: 0.95;
+  }
+
+  #pm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px 6px;
+    border-bottom: 1px solid rgba(57,255,106,0.07);
+    cursor: grab;
+  }
+
+  #pm-header:active { cursor: grabbing; }
+
+  .pm-logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #39ff6a;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-shadow: 0 0 10px rgba(57,255,106,0.45);
+  }
+
+  .pm-subtitle {
+    font-size: 8px;
+    color: #2d5040;
+    letter-spacing: 1px;
+  }
+
+  .pm-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pm-ctrl-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(57,255,106,0.12);
+    background: rgba(57,255,106,0.04);
+    color: #3a6b52;
+    font-size: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s ease;
+    pointer-events: all;
+  }
+
+  .pm-ctrl-btn:hover {
+    border-color: rgba(57,255,106,0.3);
+    color: #39ff6a;
+    background: rgba(57,255,106,0.08);
+  }
+
+  .pm-ctrl-btn.close-btn:hover {
+    border-color: rgba(255,90,90,0.3);
+    color: #ff6b6b;
+    background: rgba(255,90,90,0.07);
+  }
+
+  .pm-col-row {
+    display: grid;
+    grid-template-columns: 1fr 58px 50px;
+    padding: 5px 10px 4px;
+    border-bottom: 1px solid rgba(57,255,106,0.05);
+  }
+
+  .pm-col-label {
+    font-size: 8px;
+    color: #2d4f3d;
+    letter-spacing: 1.5px;
+  }
+
+  .pm-col-label:nth-child(2) { text-align: right; }
+  .pm-col-label:nth-child(3) { text-align: right; }
+
+  #pm-body { padding: 2px 0 4px; }
+
+  .pm-row {
+    display: grid;
+    grid-template-columns: 1fr 58px 50px;
+    align-items: center;
+    padding: 4px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.018);
+    cursor: default;
+    transition: background .15s ease;
+  }
+
+  .pm-row:last-child { border-bottom: none; }
+  .pm-row:hover { background: rgba(57,255,106,0.03); }
+
+  .pm-player {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .pm-name {
+    font-size: 10px;
+    color: #c0e8d0;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pm-meta {
+    font-size: 7.5px;
+    color: #3a5e4c;
+    letter-spacing: 0.8px;
+  }
+
+  .pm-trend {
+    font-size: 7px;
+    flex-shrink: 0;
+    margin-right: 2px;
+  }
+
+  .pm-trend.up   { color: #39ff6a; text-shadow: 0 0 6px rgba(57,255,106,0.6); }
+  .pm-trend.down { color: #ff6b6b; }
+  .pm-trend.flat { color: #556; }
+
+  .pm-val {
+    text-align: right;
+    font-size: 10px;
+    color: #a8d4b8;
+    letter-spacing: 0.3px;
+  }
+
+  .pm-chg {
+    text-align: right;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .pm-chg.up   { color: #39ff6a; }
+  .pm-chg.down { color: #ff6b6b; }
+  .pm-chg.flat { color: #445; }
+
+  #player-market.collapsed #pm-col-row,
+  #player-market.collapsed #pm-body { display: none; }
+
+  @keyframes pmSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .pm-spinning { animation: pmSpin 0.6s linear; }
+</style>
+
+<div id="player-market">
+  <div id="pm-header">
+    <div class="pm-logo">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <circle cx="5" cy="5" r="4" stroke="#39ff6a" stroke-width="1"/>
+        <path d="M3 5 Q5 2 7 5 Q5 8 3 5Z" stroke="#5af5ff" stroke-width="0.8" fill="none"/>
+      </svg>
+      PLAYER MARKET
+    </div>
+    <div class="pm-subtitle" id="pm-updated">LIVE VALUES</div>
+    <div class="pm-controls">
+      <div class="pm-ctrl-btn" id="pm-refresh-btn" title="Refresh">↺</div>
+      <div class="pm-ctrl-btn" id="pm-collapse-btn" title="Collapse">—</div>
+      <div class="pm-ctrl-btn close-btn" id="pm-close-btn" title="Close">✕</div>
+    </div>
+  </div>
+
+  <div class="pm-col-row" id="pm-col-row">
+    <span class="pm-col-label">PLAYER</span>
+    <span class="pm-col-label">VALUE</span>
+    <span class="pm-col-label">CHG</span>
+  </div>
+
+  <div id="pm-body"></div>
+</div>
+
+<script>
+(function(){
+  const PLAYERS = [
+    { name:'Mbappé',      club:'Real Madrid', pos:'FW', val:180, chg:+2.1 },
+    { name:'Vinicius Jr', club:'Real Madrid', pos:'FW', val:160, chg:+1.4 },
+    { name:'Bellingham',  club:'Real Madrid', pos:'MF', val:180, chg:+0.8 },
+    { name:'Haaland',     club:'Man City',    pos:'FW', val:170, chg:-0.5 },
+    { name:'Pedri',       club:'Barcelona',   pos:'MF', val:130, chg:+1.1 },
+    { name:'Saka',        club:'Arsenal',     pos:'FW', val:140, chg:+0.3 },
+    { name:'Salah',       club:'Liverpool',   pos:'FW', val: 80, chg:-1.2 },
+    { name:'De Bruyne',   club:'Man City',    pos:'MF', val: 55, chg:-0.9 },
+    { name:'Yamal',       club:'Barcelona',   pos:'FW', val:120, chg:+3.4 },
+    { name:'Wirtz',       club:'B. Leverkusen',pos:'MF',val:130, chg:+2.0 },
+  ];
+
+  function fmtVal(v){ return v >= 100 ? `€${v}M` : `€${v}M`; }
+
+  function renderRows(){
+    const body = document.getElementById('pm-body');
+    body.innerHTML = '';
+    PLAYERS.forEach(p => {
+      const up   = p.chg > 0.05;
+      const down = p.chg < -0.05;
+      const dir  = up ? 'up' : down ? 'down' : 'flat';
+      const arrow= up ? '▲' : down ? '▼' : '●';
+      const sign = up ? '+' : '';
+      const row  = document.createElement('div');
+      row.className = 'pm-row';
+      row.innerHTML = `
+        <div class="pm-player">
+          <div style="display:flex;align-items:center;gap:4px">
+            <span class="pm-trend ${dir}">${arrow}</span>
+            <span class="pm-name">${p.name}</span>
+          </div>
+          <span class="pm-meta">${p.club} · ${p.pos}</span>
+        </div>
+        <div class="pm-val">${fmtVal(p.val)}</div>
+        <div class="pm-chg ${dir}">${sign}${p.chg.toFixed(1)}%</div>
+      `;
+      body.appendChild(row);
+    });
+  }
+
+  renderRows();
+
+  // Refresh
+  const refreshBtn = document.getElementById('pm-refresh-btn');
+  refreshBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    refreshBtn.classList.add('pm-spinning');
+    setTimeout(() => refreshBtn.classList.remove('pm-spinning'), 600);
+    PLAYERS.forEach(p => {
+      const d = (Math.random() - 0.48) * 0.6;
+      p.chg = parseFloat((p.chg + d).toFixed(1));
+      p.val = parseFloat(Math.max(1, p.val * (1 + d * 0.002)).toFixed(1));
+    });
+    renderRows();
+    document.getElementById('pm-updated').textContent = 'UPDATED';
+    setTimeout(() => document.getElementById('pm-updated').textContent = 'LIVE VALUES', 2000);
+  });
+
+  // Collapse
+  const colBtn = document.getElementById('pm-collapse-btn');
+  const panel  = document.getElementById('player-market');
+  colBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    panel.classList.toggle('collapsed');
+    colBtn.textContent = panel.classList.contains('collapsed') ? '+' : '—';
+  });
+
+  // Close
+  document.getElementById('pm-close-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    panel.style.transition = 'opacity .25s ease, transform .25s ease';
+    panel.style.opacity = '0';
+    panel.style.transform = 'scale(0.92)';
+    setTimeout(() => panel.style.display = 'none', 260);
+  });
+
+  // Drag
+  let dragging = false, ox = 0, oy = 0;
+  const header = document.getElementById('pm-header');
+
+  header.addEventListener('mousedown', e => {
+    if(e.target.classList.contains('pm-ctrl-btn')) return;
+    dragging = true;
+    const r = panel.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    panel.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    let nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - ox));
+    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - oy));
+    panel.style.left   = nx + 'px';
+    panel.style.top    = ny + 'px';
+    panel.style.bottom = 'auto';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if(!dragging) return;
+    dragging = false;
+    panel.classList.remove('dragging');
+    document.body.style.userSelect = '';
+  });
+
+  // Touch
+  header.addEventListener('touchstart', e => {
+    if(e.target.classList.contains('pm-ctrl-btn')) return;
+    const t = e.touches[0], r = panel.getBoundingClientRect();
+    dragging = true; ox = t.clientX - r.left; oy = t.clientY - r.top;
+    panel.classList.add('dragging');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if(!dragging) return;
+    const t = e.touches[0];
+    let nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  t.clientX - ox));
+    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, t.clientY - oy));
+    panel.style.left = nx + 'px'; panel.style.top = ny + 'px'; panel.style.bottom = 'auto';
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => { dragging = false; panel.classList.remove('dragging'); });
+
+  // Live flicker
+  setInterval(() => {
+    const idx = Math.floor(Math.random() * PLAYERS.length);
+    const p   = PLAYERS[idx];
+    const d   = (Math.random() - 0.5) * 0.3;
+    p.chg = parseFloat((p.chg + d).toFixed(1));
+    p.val = parseFloat(Math.max(1, p.val + d * 0.1).toFixed(1));
+    const rows = document.querySelectorAll('#pm-body .pm-row');
+    if(!rows[idx]) return;
+    const up   = p.chg > 0.05;
+    const down = p.chg < -0.05;
+    const dir  = up ? 'up' : down ? 'down' : 'flat';
+    const arrow= up ? '▲' : down ? '▼' : '●';
+    const sign = up ? '+' : '';
+    rows[idx].querySelector('.pm-trend').className = `pm-trend ${dir}`;
+    rows[idx].querySelector('.pm-trend').textContent = arrow;
+    rows[idx].querySelector('.pm-val').textContent = fmtVal(p.val);
+    const chgEl = rows[idx].querySelector('.pm-chg');
+    chgEl.className = `pm-chg ${dir}`;
+    chgEl.textContent = `${sign}${p.chg.toFixed(1)}%`;
+    rows[idx].style.background = up ? 'rgba(57,255,106,0.06)' : down ? 'rgba(255,107,107,0.05)' : '';
+    setTimeout(() => { rows[idx].style.background = ''; }, 350);
+  }, 2800);
+
+})();
+</script>
+
 </body>
 </html>
