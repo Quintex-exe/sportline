@@ -3170,6 +3170,297 @@ window.FOOTINT_ARC_PATCH = {
   .pm-spinning { animation: pmSpin 0.6s linear; }
 </style>
 
+<!-- ── INTEL DETAIL PANEL ── -->
+<style>
+  #intel-detail-panel {
+    display: none;
+    position: fixed;
+    top: 64px;
+    right: 258px;
+    width: 320px;
+    max-height: calc(100vh - 120px);
+    z-index: 600;
+    background: rgba(3,10,8,0.97);
+    border: 1px solid rgba(57,255,106,0.18);
+    border-radius: 10px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 0 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(57,255,106,0.05) inset;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    flex-direction: column;
+    user-select: none;
+  }
+
+  #intel-detail-panel.idp-open {
+    display: flex;
+  }
+
+  #intel-detail-panel.idp-dragging {
+    box-shadow: 0 0 60px rgba(0,0,0,0.75), 0 0 28px rgba(57,255,106,0.15);
+    opacity: 0.96;
+  }
+
+  #idp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 7px;
+    border-bottom: 1px solid rgba(57,255,106,0.08);
+    cursor: grab;
+    flex-shrink: 0;
+  }
+
+  #idp-header:active { cursor: grabbing; }
+
+  .idp-logo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #5af5ff;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-shadow: 0 0 10px rgba(90,245,255,0.45);
+  }
+
+  .idp-badge-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #idp-type-badge {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+
+  .idp-ctrl {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(57,255,106,0.12);
+    background: rgba(57,255,106,0.04);
+    color: #3a6b52;
+    font-size: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .18s ease;
+  }
+
+  .idp-ctrl:hover {
+    border-color: rgba(57,255,106,0.3);
+    color: #39ff6a;
+    background: rgba(57,255,106,0.08);
+  }
+
+  .idp-ctrl.idp-close:hover {
+    border-color: rgba(255,90,90,0.3);
+    color: #ff6b6b;
+    background: rgba(255,90,90,0.07);
+  }
+
+  #idp-scroll {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0;
+  }
+
+  #idp-scroll::-webkit-scrollbar { width: 3px; }
+  #idp-scroll::-webkit-scrollbar-thumb { background: rgba(57,255,106,0.15); border-radius: 2px; }
+
+  #idp-headline {
+    padding: 12px 14px 10px;
+    font-size: 11px;
+    color: #d9fff0;
+    line-height: 1.55;
+    border-bottom: 1px solid rgba(57,255,106,0.06);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  #idp-route-row {
+    padding: 7px 14px;
+    font-size: 9px;
+    color: #39ff6a;
+    letter-spacing: 1.5px;
+    border-bottom: 1px solid rgba(57,255,106,0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .idp-section-label {
+    padding: 8px 14px 4px;
+    font-size: 8px;
+    color: #2d5040;
+    letter-spacing: 2px;
+  }
+
+  #idp-gist {
+    padding: 4px 14px 12px;
+    font-size: 10px;
+    color: #7da08d;
+    line-height: 1.7;
+    font-family: 'Rajdhani', sans-serif;
+    border-bottom: 1px solid rgba(57,255,106,0.05);
+    min-height: 60px;
+  }
+
+  #idp-gist .idp-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #2d5040;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding-top: 4px;
+  }
+
+  .idp-spinner {
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(57,255,106,0.2);
+    border-top-color: #39ff6a;
+    border-radius: 50%;
+    animation: idpSpin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes idpSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  #idp-analytics {
+    padding: 4px 14px 12px;
+    border-bottom: 1px solid rgba(57,255,106,0.05);
+  }
+
+  .idp-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    font-size: 9px;
+  }
+
+  .idp-stat-row:last-child { border-bottom: none; }
+
+  .idp-stat-label {
+    color: #3a6b52;
+    letter-spacing: 1px;
+  }
+
+  .idp-stat-value {
+    color: #c0e8d0;
+    letter-spacing: 0.5px;
+  }
+
+  .idp-stat-bar-wrap {
+    flex: 1;
+    margin: 0 10px;
+    height: 3px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .idp-stat-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #39ff6a, #5af5ff);
+    border-radius: 999px;
+    box-shadow: 0 0 6px rgba(57,255,106,0.4);
+    transition: width 0.6s ease;
+  }
+
+  #idp-link-row {
+    padding: 10px 14px 12px;
+  }
+
+  #idp-source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: #5af5ff;
+    text-decoration: none;
+    letter-spacing: 1px;
+    border: 1px solid rgba(90,245,255,0.15);
+    border-radius: 4px;
+    padding: 5px 10px;
+    background: rgba(90,245,255,0.04);
+    transition: all .2s ease;
+  }
+
+  #idp-source-link:hover {
+    background: rgba(90,245,255,0.08);
+    border-color: rgba(90,245,255,0.3);
+  }
+
+  /* Feed items become clickable */
+  .alert-item.idp-clickable {
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+
+  .alert-item.idp-clickable:hover {
+    background: rgba(57,255,106,0.04);
+  }
+
+  #idp-ts {
+    font-size: 8px;
+    color: #1e3d2a;
+    letter-spacing: 1px;
+    padding-bottom: 2px;
+  }
+</style>
+
+<!-- ── INTEL DETAIL PANEL HTML ── -->
+<div id="intel-detail-panel">
+  <div id="idp-header">
+    <div class="idp-logo">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <circle cx="5" cy="5" r="4" stroke="#5af5ff" stroke-width="1"/>
+        <line x1="5" y1="2" x2="5" y2="8" stroke="#39ff6a" stroke-width="0.8"/>
+        <line x1="2" y1="5" x2="8" y2="5" stroke="#39ff6a" stroke-width="0.8"/>
+      </svg>
+      INTEL DETAIL
+    </div>
+    <div class="idp-badge-wrap">
+      <div id="idp-type-badge" class="alert-badge"></div>
+      <div class="idp-ctrl idp-close" id="idp-close-btn" title="Close">✕</div>
+    </div>
+  </div>
+
+  <div id="idp-scroll">
+    <div id="idp-headline"></div>
+    <div id="idp-route-row"></div>
+
+    <div class="idp-section-label">AI GIST</div>
+    <div id="idp-gist">
+      <div class="idp-loading">
+        <div class="idp-spinner"></div>
+        GENERATING ANALYSIS...
+      </div>
+    </div>
+
+    <div class="idp-section-label">SIGNAL ANALYTICS</div>
+    <div id="idp-analytics"></div>
+
+    <div id="idp-link-row">
+      <a id="idp-source-link" href="#" target="_blank">⬡ OPEN SOURCE →</a>
+    </div>
+    <div style="padding: 0 14px 10px;">
+      <div id="idp-ts"></div>
+    </div>
+  </div>
+</div>
+
 <div id="player-market">
   <div id="pm-header">
     <div class="pm-logo">
@@ -3350,5 +3641,210 @@ window.FOOTINT_ARC_PATCH = {
 })();
 </script>
 
+<!-- ── INTEL DETAIL PANEL LOGIC ── -->
+<script>
+(function(){
+
+  const panel   = document.getElementById('intel-detail-panel');
+  const header  = document.getElementById('idp-header');
+  const closeBtn= document.getElementById('idp-close-btn');
+  const gistEl  = document.getElementById('idp-gist');
+  const analyticsEl = document.getElementById('idp-analytics');
+  const headlineEl  = document.getElementById('idp-headline');
+  const routeEl     = document.getElementById('idp-route-row');
+  const badgeEl     = document.getElementById('idp-type-badge');
+  const linkEl      = document.getElementById('idp-source-link');
+  const tsEl        = document.getElementById('idp-ts');
+
+  // ── Close ──
+  closeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    panel.classList.remove('idp-open');
+  });
+
+  // ── Drag ──
+  let dragging = false, ox = 0, oy = 0;
+  header.addEventListener('mousedown', e => {
+    if(e.target.classList.contains('idp-ctrl')) return;
+    dragging = true;
+    const r = panel.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    panel.classList.add('idp-dragging');
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    let nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - ox));
+    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - oy));
+    panel.style.left   = nx + 'px';
+    panel.style.top    = ny + 'px';
+    panel.style.right  = 'auto';
+    panel.style.bottom = 'auto';
+  });
+  document.addEventListener('mouseup', () => {
+    if(!dragging) return;
+    dragging = false;
+    panel.classList.remove('idp-dragging');
+    document.body.style.userSelect = '';
+  });
+
+  // ── Analytics generator (deterministic from title) ──
+  function seedRng(str){
+    let h = 0;
+    for(let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    return () => { h ^= h << 13; h ^= h >> 17; h ^= h << 5; return (h >>> 0) / 0xFFFFFFFF; };
+  }
+
+  function buildAnalytics(title, type){
+    const rng = seedRng(title);
+    const labels = {
+      transfer: [['RUMOUR CONF.', 92],['MEDIA HEAT', 80],['MARKET IMPACT', 65]],
+      injury:   [['SEVERITY',     70],['MATCH RISK',  85],['RECOVERY EST.', 55]],
+      signing:  [['DEAL CONF.',   88],['FEE IMPACT',  72],['SQUAD FIT',     80]],
+      scout:    [['TALENT SCORE', 77],['TRACK DEPTH', 63],['PRIORITY LVL',  70]],
+      match:    [['INTENSITY',    84],['SOCIAL SURGE',74],['BROADCAST RCH', 90]],
+    };
+    const rows = labels[type] || labels.match;
+    return rows.map(([label, base]) => {
+      const pct = Math.min(99, Math.floor(base * (0.75 + rng() * 0.5)));
+      return { label, pct };
+    });
+  }
+
+  function renderAnalytics(stats){
+    analyticsEl.innerHTML = stats.map(s => `
+      <div class="idp-stat-row">
+        <span class="idp-stat-label">${s.label}</span>
+        <div class="idp-stat-bar-wrap">
+          <div class="idp-stat-bar" style="width:${s.pct}%"></div>
+        </div>
+        <span class="idp-stat-value">${s.pct}%</span>
+      </div>
+    `).join('');
+  }
+
+  // ── AI gist via Anthropic API ──
+  async function fetchGist(headline, type){
+    gistEl.innerHTML = '<div class="idp-loading"><div class="idp-spinner"></div>GENERATING ANALYSIS...</div>';
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: 'You are FOOTINT, a football intelligence terminal AI. Given a football news headline, write a concise 2-3 sentence intel brief. Be analytical, data-driven, punchy. No intro phrases. No markdown. Plain text only.',
+          messages: [{ role: 'user', content: `Headline: "${headline}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
+        })
+      });
+      const data = await res.json();
+      const text = data?.content?.[0]?.text || '';
+      if(text){
+        gistEl.textContent = text;
+      } else {
+        gistEl.textContent = 'SIGNAL ANALYSIS UNAVAILABLE — CHECK SOURCE DIRECTLY.';
+      }
+    } catch(e) {
+      gistEl.textContent = 'UPLINK INTERRUPTED — INTELLIGENCE FEED OFFLINE.';
+    }
+  }
+
+  // ── Open panel ──
+  window.openIntelDetail = function(event){
+    const { type, title, url, from, to, ts } = event;
+
+    // Badge
+    badgeEl.className = `alert-badge badge-${type}`;
+    badgeEl.textContent = (type || 'match').toUpperCase();
+
+    // Headline
+    headlineEl.textContent = title;
+
+    // Route
+    if(from && to){
+      routeEl.innerHTML = `<span style="color:#7a9e88">${from}</span><span style="color:#39ff6a;margin:0 6px">→</span><span style="color:#7a9e88">${to}</span>`;
+    } else {
+      routeEl.innerHTML = `<span style="color:#2d5040">GLOBAL INTEL FEED</span>`;
+    }
+
+    // Timestamp
+    tsEl.textContent = ts ? ts + ' UTC' : '';
+
+    // Link
+    linkEl.href = url || '#';
+
+    // Analytics
+    renderAnalytics(buildAnalytics(title, type));
+
+    // Open panel
+    panel.classList.add('idp-open');
+
+    // AI gist
+    fetchGist(title, type);
+  };
+
+  // ── Patch feed injection to make items clickable ──
+  function patchFeedItem(item, eventData){
+    item.classList.add('idp-clickable');
+    // Remove any anchor links, intercept click
+    item.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', e => e.preventDefault());
+    });
+    item.addEventListener('click', () => {
+      window.openIntelDetail(eventData);
+    });
+  }
+
+  // ── Observe new alert-list children ──
+  const alertList = document.getElementById('alert-list');
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if(node.nodeType !== 1 || !node.classList.contains('alert-item')) return;
+        const type  = node.getAttribute('data-type') || 'match';
+        const aTag  = node.querySelector('a');
+        const bodyDiv = node.querySelector('.alert-body');
+        const routeDiv = node.querySelector('.alert-route');
+        const timeDiv   = node.querySelector('.alert-time');
+
+        const title = aTag ? aTag.textContent.trim() : (bodyDiv ? bodyDiv.textContent.trim() : '');
+        const url   = aTag ? aTag.href : '#';
+        const ts    = timeDiv ? timeDiv.textContent.trim().replace(' UTC','') : '';
+        let from = '', to = '';
+        if(routeDiv){
+          const parts = routeDiv.textContent.replace('→','|').split('|');
+          from = (parts[0] || '').trim();
+          to   = (parts[1] || '').trim();
+        }
+        patchFeedItem(node, { type, title, url, from, to, ts });
+      });
+    });
+  });
+  observer.observe(alertList, { childList: true });
+
+  // Also patch any items already in the list (from cache restore)
+  setTimeout(() => {
+    alertList.querySelectorAll('.alert-item').forEach(node => {
+      if(node.classList.contains('idp-clickable')) return;
+      const type    = node.getAttribute('data-type') || 'match';
+      const aTag    = node.querySelector('a');
+      const bodyDiv = node.querySelector('.alert-body');
+      const routeDiv= node.querySelector('.alert-route');
+      const timeDiv  = node.querySelector('.alert-time');
+      const title = aTag ? aTag.textContent.trim() : (bodyDiv ? bodyDiv.textContent.trim() : '');
+      const url   = aTag ? aTag.href : '#';
+      const ts    = timeDiv ? timeDiv.textContent.trim().replace(' UTC','') : '';
+      let from = '', to = '';
+      if(routeDiv){
+        const parts = routeDiv.textContent.replace('→','|').split('|');
+        from = (parts[0] || '').trim();
+        to   = (parts[1] || '').trim();
+      }
+      patchFeedItem(node, { type, title, url, from, to, ts });
+    });
+  }, 800);
+
+})();
+</script>
 </body>
-</html>
