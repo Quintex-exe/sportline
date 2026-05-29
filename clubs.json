@@ -1,0 +1,169 @@
+{
+  "arsenal":{
+    "city":"London",
+    "lat":51.5074,
+    "lng":-0.1278,
+    "region":"europe"
+  },
+
+  "chelsea":{
+    "city":"London",
+    "lat":51.5074,
+    "lng":-0.1278,
+    "region":"europe"
+  },
+
+  "liverpool":{
+    "city":"Liverpool",
+    "lat":53.4084,
+    "lng":-2.9916,
+    "region":"europe"
+  },
+
+  "manchester united":{
+    "city":"Manchester",
+    "lat":53.4808,
+    "lng":-2.2426,
+    "region":"europe"
+  },
+
+  "manchester city":{
+    "city":"Manchester",
+    "lat":53.4808,
+    "lng":-2.2426,
+    "region":"europe"
+  },
+
+  "tottenham":{
+    "city":"London",
+    "lat":51.5074,
+    "lng":-0.1278,
+    "region":"europe"
+  },
+
+  "real madrid":{
+    "city":"Madrid",
+    "lat":40.4168,
+    "lng":-3.7038,
+    "region":"europe"
+  },
+
+  "barcelona":{
+    "city":"Barcelona",
+    "lat":41.3874,
+    "lng":2.1686,
+    "region":"europe"
+  },
+
+  "atletico madrid":{
+    "city":"Madrid",
+    "lat":40.4168,
+    "lng":-3.7038,
+    "region":"europe"
+  },
+
+  "psg":{
+    "city":"Paris",
+    "lat":48.8566,
+    "lng":2.3522,
+    "region":"europe"
+  },
+
+  "bayern":{
+    "city":"Munich",
+    "lat":48.1351,
+    "lng":11.5820,
+    "region":"europe"
+  },
+
+  "borussia dortmund":{
+    "city":"Dortmund",
+    "lat":51.5136,
+    "lng":7.4653,
+    "region":"europe"
+  },
+
+  "juventus":{
+    "city":"Turin",
+    "lat":45.0703,
+    "lng":7.6869,
+    "region":"europe"
+  },
+
+  "inter milan":{
+    "city":"Milan",
+    "lat":45.4642,
+    "lng":9.1900,
+    "region":"europe"
+  },
+
+  "ac milan":{
+    "city":"Milan",
+    "lat":45.4642,
+    "lng":9.1900,
+    "region":"europe"
+  },
+
+  "flamengo":{
+    "city":"Rio de Janeiro",
+    "lat":-22.9068,
+    "lng":-43.1729,
+    "region":"southamerica"
+  },
+
+  "palmeiras":{
+    "city":"Sao Paulo",
+    "lat":-23.5505,
+    "lng":-46.6333,
+    "region":"southamerica"
+  },
+
+  "boca":{
+    "city":"Buenos Aires",
+    "lat":-34.6037,
+    "lng":-58.3816,
+    "region":"southamerica"
+  },
+
+  "river plate":{
+    "city":"Buenos Aires",
+    "lat":-34.6037,
+    "lng":-58.3816,
+    "region":"southamerica"
+  },
+
+  "inter miami":{
+    "city":"Miami",
+    "lat":25.7617,
+    "lng":-80.1918,
+    "region":"northamerica"
+  },
+
+  "lafc":{
+    "city":"Los Angeles",
+    "lat":34.0522,
+    "lng":-118.2437,
+    "region":"northamerica"
+  },
+
+  "al nassr":{
+    "city":"Riyadh",
+    "lat":24.7136,
+    "lng":46.6753,
+    "region":"asia"
+  },
+
+  "al hilal":{
+    "city":"Riyadh",
+    "lat":24.7136,
+    "lng":46.6753,
+    "region":"asia"
+  },
+
+  "al ahly":{
+    "city":"Cairo",
+    "lat":30.0444,
+    "lng":31.2357,
+    "region":"africa"
+  }
+}
