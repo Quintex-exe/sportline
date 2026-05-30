@@ -25,14 +25,14 @@ app.use(express.static('public'));
 // Persistent queue — every new article gets an AI gist generated server-side.
 // Rate-limited to 1 req / 800ms so the queue drains continuously without throttle.
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || 'YOUR_API_KEY_HERE';
 const gistCache = new Map();   // link → gist string
 const gistQueue = [];          // { link, title, type, resolve }
 let gistBusy = false;
 
 async function anthropicRequest(title, type) {
   return new Promise((resolve) => {
-    if (!ANTHROPIC_API_KEY) {
+    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
       return resolve('ANTHROPIC_API_KEY not set — add it to your environment.');
     }
 
@@ -307,7 +307,7 @@ setInterval(pullFeeds, 30000);
 
 server.listen(3000, () => {
   console.log('FOOTINT running on port 3000');
-  if (!ANTHROPIC_API_KEY) {
+  if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
     console.warn('[WARN] ANTHROPIC_API_KEY not set — gist generation disabled. Set it with: export ANTHROPIC_API_KEY=sk-...');
   } else {
     console.log('[GIST ENGINE] Active — queue draining at 800ms intervals');
