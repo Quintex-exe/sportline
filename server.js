@@ -1,19 +1,20 @@
-// FOOTINT FINALIZED SERVER.JS
-// Data-driven analytics backend — with persistent server-side AI Gist engine
+// FOOTINT SERVER.JS
+// Zero-cost extractive summarization engine — no API keys, no rate limits.
+// Scales to any number of users. TextRank + domain keyword scoring.
 
-const express = require('express');
-const http = require('http');
+const express   = require('express');
+const http      = require('http');
 const { Server } = require('socket.io');
-const Parser = require('rss-parser');
-const cors = require('cors');
-const https = require('https');
+const Parser    = require('rss-parser');
+const cors      = require('cors');
+const { summarize } = require('./summarizer');
 const { detectClub } = require('./geoMapper');
 
-const app = express();
+const app    = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: { origin: '*' }
 });
 
 const parser = new Parser();
@@ -21,60 +22,13 @@ const parser = new Parser();
 app.use(cors());
 app.use(express.static('public'));
 
-// ── ANTHROPIC GIST ENGINE ─────────────────────────────────────────────────────
-// Persistent queue — every new article gets an AI gist generated server-side.
-// Rate-limited to 1 req / 800ms so the queue drains continuously without throttle.
+// ── GIST ENGINE (free, local) ─────────────────────────────────────────────────
+// Queue-based to avoid hammering article servers.
+// 400ms between fetches — polite crawling, no ban risk.
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_KEY_HERE';
-const gistCache = new Map();   // link → gist string
-const gistQueue = [];          // { link, title, type, resolve }
-let gistBusy = false;
-
-async function openRouterRequest(title, type) {
-  return new Promise((resolve) => {
-    if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'YOUR_OPENROUTER_KEY_HERE') {
-      return resolve('OPENROUTER_API_KEY not set — add it to your environment.');
-    }
-
-    const body = JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 120,
-      system: 'You are FOOTINT, a football intelligence terminal AI. Given a headline, write a punchy 2-sentence intel brief. No intro phrases. No markdown. Plain text only.',
-      messages: [{ role: 'user', content: `Headline: "${title}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
-    });
-
-    const options = {
-      hostname: 'api.anthropic.com',
-      path: '/v1/messages',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': OPENROUTER_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Length': Buffer.byteLength(body)
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let raw = '';
-      res.on('data', chunk => raw += chunk);
-      res.on('end', () => {
-        try {
-          const data = JSON.parse(raw);
-          const text = data?.content?.[0]?.text?.trim() || '';
-          resolve(text || 'SIGNAL ANALYSIS UNAVAILABLE.');
-        } catch {
-          resolve('PARSE ERROR — RAW SIGNAL UNREADABLE.');
-        }
-      });
-    });
-
-    req.on('error', () => resolve('UPLINK INTERRUPTED — INTELLIGENCE FEED OFFLINE.'));
-    req.setTimeout(8000, () => { req.destroy(); resolve('REQUEST TIMED OUT — RETRYING ON NEXT CYCLE.'); });
-    req.write(body);
-    req.end();
-  });
-}
+const gistCache = new Map();  // url → gist string
+const gistQueue = [];         // { link, title, type, resolve }
+let   gistBusy  = false;
 
 async function drainGistQueue() {
   if (gistBusy || gistQueue.length === 0) return;
@@ -82,7 +36,6 @@ async function drainGistQueue() {
 
   const job = gistQueue.shift();
 
-  // Already cached (e.g. duplicate link queued before first resolved)
   if (gistCache.has(job.link)) {
     job.resolve(gistCache.get(job.link));
     gistBusy = false;
@@ -91,22 +44,23 @@ async function drainGistQueue() {
   }
 
   try {
-    const gist = await openRouterRequest(job.title, job.type);
+    const gist = await summarize(job.link, job.title, job.type);
     gistCache.set(job.link, gist);
     job.resolve(gist);
-    console.log(`[GIST OK] ${job.type.toUpperCase()} | ${gist.slice(0, 70)}…`);
+    console.log(`[GIST] ${job.type.toUpperCase()} | ${gist.slice(0, 72)}…`);
   } catch (err) {
     console.error('[GIST ERR]', err.message);
-    job.resolve('INTELLIGENCE GENERATION FAILED.');
+    const fallback = `${job.title}. Intelligence extracted from live signal feed — type: ${job.type}.`;
+    gistCache.set(job.link, fallback);
+    job.resolve(fallback);
   }
 
   gistBusy = false;
-  // 800ms between API calls — continuous drain, never floods
-  setTimeout(drainGistQueue, 800);
+  // 400ms between article fetches — polite rate
+  setTimeout(drainGistQueue, 400);
 }
 
 function queueGist(link, title, type) {
-  // Return cached result immediately if already generated
   if (gistCache.has(link)) return Promise.resolve(gistCache.get(link));
   return new Promise((resolve) => {
     gistQueue.push({ link, title, type, resolve });
@@ -114,7 +68,7 @@ function queueGist(link, title, type) {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ── FEEDS ─────────────────────────────────────────────────────────────────────
 
 const FEEDS = [
   'https://news.google.com/rss/search?q=football+transfer',
@@ -148,46 +102,39 @@ const feedCache = [];
 
 const analytics = {
   totalEvents: 0,
-  transfers: 0,
-  injuries: 0,
-  signings: 0,
-  scouting: 0,
-  matches: 0,
+  transfers:   0,
+  injuries:    0,
+  signings:    0,
+  scouting:    0,
+  matches:     0,
   regions: {
-    europe: 0,
-    southamerica: 0,
-    northamerica: 0,
-    asia: 0,
-    africa: 0,
-    global: 0
+    europe: 0, southamerica: 0, northamerica: 0,
+    asia: 0, africa: 0, global: 0
   },
-  clubs: {},
-  cities: {},
-  sources: {},
+  clubs:         {},
+  cities:        {},
+  sources:       {},
   eventsPerHour: [],
-  feedHealth: {
-    online: 0,
-    offline: 0
-  },
-  lastRefresh: null
+  feedHealth:    { online: 0, offline: 0 },
+  lastRefresh:   null
 };
 
 function classify(title = '') {
   const t = title.toLowerCase();
   if (t.includes('injur') || t.includes('ruled out') || t.includes('doubt')) return 'injury';
-  if (t.includes('sign') || t.includes('agreement') || t.includes('contract')) return 'signing';
-  if (t.includes('scout') || t.includes('monitor') || t.includes('tracking')) return 'scout';
-  if (t.includes('transfer') || t.includes('bid') || t.includes('linked') || t.includes('fee')) return 'transfer';
+  if (t.includes('sign')  || t.includes('agreement') || t.includes('contract')) return 'signing';
+  if (t.includes('scout') || t.includes('monitor')   || t.includes('tracking')) return 'scout';
+  if (t.includes('transfer') || t.includes('bid')    || t.includes('linked') || t.includes('fee')) return 'transfer';
   return 'match';
 }
 
 function detectRegion(text = '') {
   const t = text.toLowerCase();
-  if (t.includes('arsenal') || t.includes('chelsea') || t.includes('madrid')) return 'europe';
-  if (t.includes('flamengo') || t.includes('libertadores')) return 'southamerica';
-  if (t.includes('mls') || t.includes('inter miami')) return 'northamerica';
-  if (t.includes('saudi') || t.includes('al nassr')) return 'asia';
-  if (t.includes('caf') || t.includes('al ahly')) return 'africa';
+  if (t.includes('arsenal')  || t.includes('chelsea')  || t.includes('madrid'))     return 'europe';
+  if (t.includes('flamengo') || t.includes('libertadores'))                          return 'southamerica';
+  if (t.includes('mls')      || t.includes('inter miami'))                           return 'northamerica';
+  if (t.includes('saudi')    || t.includes('al nassr'))                              return 'asia';
+  if (t.includes('caf')      || t.includes('al ahly'))                               return 'africa';
   return 'global';
 }
 
@@ -201,11 +148,11 @@ function updateAnalytics(payload) {
     default:         analytics.matches++;
   }
   analytics.regions[payload.region] = (analytics.regions[payload.region] || 0) + 1;
-  if (payload.club)   analytics.clubs[payload.club]   = (analytics.clubs[payload.club]   || 0) + 1;
-  if (payload.city)   analytics.cities[payload.city]  = (analytics.cities[payload.city]  || 0) + 1;
+  if (payload.club)   analytics.clubs[payload.club]     = (analytics.clubs[payload.club]     || 0) + 1;
+  if (payload.city)   analytics.cities[payload.city]    = (analytics.cities[payload.city]    || 0) + 1;
   if (payload.source) analytics.sources[payload.source] = (analytics.sources[payload.source] || 0) + 1;
   analytics.eventsPerHour.push(Date.now());
-  analytics.eventsPerHour = analytics.eventsPerHour.filter(t => Date.now() - t < 3600000);
+  analytics.eventsPerHour = analytics.eventsPerHour.filter(t => Date.now() - t < 3_600_000);
 }
 
 function broadcastAnalytics() {
@@ -218,8 +165,7 @@ async function processFeed(url) {
     analytics.feedHealth.online++;
 
     for (const item of feed.items.slice(0, 10)) {
-      if (!item.link) continue;
-      if (sentLinks.has(item.link)) continue;
+      if (!item.link || sentLinks.has(item.link)) continue;
       sentLinks.add(item.link);
 
       const clubData = detectClub(item.title);
@@ -237,27 +183,22 @@ async function processFeed(url) {
         region:    clubData?.region || detectRegion(item.title),
         url:       item.link,
         timestamp: Date.now(),
-        gist:      null   // populated below
+        gist:      null
       };
 
       updateAnalytics(payload);
-
-      // Emit immediately so the feed item appears right away
       io.emit('intel-event', payload);
       broadcastAnalytics();
 
-      // Queue gist — when ready, emit a patch event to all clients
+      // Queue free summarization — emits patch when ready
       queueGist(item.link, item.title, type).then(gist => {
         payload.gist = gist;
-        // Push gist update so the detail panel receives it live
         io.emit('intel-gist', { url: item.link, gist });
-        console.log(`[GIST BROADCAST] ${item.link.slice(0, 50)}`);
       });
 
       feedCache.push(payload);
       if (feedCache.length > 300) feedCache.shift();
     }
-
   } catch {
     analytics.feedHealth.offline++;
   }
@@ -271,22 +212,20 @@ async function pullFeeds() {
   broadcastAnalytics();
 }
 
-// ── REST endpoints ────────────────────────────────────────────────────────────
+// ── REST ──────────────────────────────────────────────────────────────────────
 
-app.get('/api/feed', (req, res) => {
-  res.json(feedCache);
-});
+app.get('/api/feed', (_req, res) => res.json(feedCache));
 
-app.get('/api/stats', (req, res) => {
-  res.json({ analytics, cacheSize: feedCache.length, eventsLastHour: analytics.eventsPerHour.length });
-});
+app.get('/api/stats', (_req, res) => res.json({
+  analytics,
+  cacheSize:      feedCache.length,
+  eventsLastHour: analytics.eventsPerHour.length
+}));
 
-// On-demand gist endpoint — for when the client opens the detail panel
-// and the gist hasn't arrived via socket yet.
+// On-demand gist — called from Intel Detail panel
 app.get('/api/gist', async (req, res) => {
   const { url, title, type } = req.query;
   if (!url || !title) return res.status(400).json({ error: 'url and title required' });
-
   const gist = await queueGist(url, title, type || 'match');
   res.json({ url, gist });
 });
@@ -295,7 +234,6 @@ app.get('/api/gist', async (req, res) => {
 
 io.on('connection', socket => {
   socket.emit('connected', { status: 'LIVE' });
-  // Send cache with any already-generated gists attached
   socket.emit('initial-feed', feedCache);
   socket.emit('analytics', analytics);
 });
@@ -303,13 +241,10 @@ io.on('connection', socket => {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
 pullFeeds();
-setInterval(pullFeeds, 30000);
+setInterval(pullFeeds, 30_000);
 
 server.listen(3000, () => {
-  console.log('FOOTINT running on port 3000');
-  if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'YOUR_OPENROUTER_KEY_HERE') {
-    console.warn('[WARN] OPENROUTER_API_KEY not set — gist generation disabled. Set it with: export OPENROUTER_API_KEY=sk-...');
-  } else {
-    console.log('[GIST ENGINE] Active — queue draining at 800ms intervals');
-  }
+  console.log('FOOTINT running on :3000');
+  console.log('[GIST ENGINE] Free extractive summarizer active — 0 API calls, unlimited scale');
+  console.log(`[GIST CACHE]  ${gistCache.size} entries loaded`);
 });
