@@ -2882,13 +2882,13 @@ function renderCachedFeed(event){
 
 // cached old feed
 socket.on('initial-feed', feeds => {
-
   feeds.reverse().forEach(event => {
-
+    // Cache any pre-generated gists from the server
+    if(event.url && event.gist && typeof clientGistCache !== 'undefined'){
+      clientGistCache.set(event.url, event.gist);
+    }
     renderCachedFeed(event);
-
   });
-
 });
 
 // live incoming feed
@@ -2918,6 +2918,11 @@ socket.on('intel-event', event => {
       type: event.type || 'match',
       progress: 0
     });
+  }
+
+  // Cache gist if server already generated it
+  if(event.url && event.gist && typeof clientGistCache !== 'undefined'){
+    clientGistCache.set(event.url, event.gist);
   }
 
   renderCachedFeed(event);
@@ -3724,29 +3729,62 @@ window.FOOTINT_ARC_PATCH = {
     `).join('');
   }
 
-  // ── AI gist via Anthropic API ──
-  async function fetchGist(headline, type){
-    gistEl.innerHTML = '<div class="idp-loading"><div class="idp-spinner"></div>GENERATING ANALYSIS...</div>';
+  // ── Client-side gist cache (populated by server via socket) ──
+  const clientGistCache = new Map(); // url → gist string
+
+  // Listen for server-generated gists arriving via socket
+  // Works for both live events (intel-gist) and initial feed (gist field on payload)
+  if(typeof socket !== 'undefined'){
+    socket.on('intel-gist', ({ url, gist }) => {
+      clientGistCache.set(url, gist);
+      // If the detail panel is open and showing this article, update it live
+      if(panel.classList.contains('idp-open') && linkEl.href === url){
+        gistEl.textContent = gist;
+      }
+    });
+  }
+
+  // ── Gist resolver: server socket → REST fallback → Anthropic direct fallback ──
+  async function resolveGist(url, title, type){
+    // 1. Already received via socket?
+    if(clientGistCache.has(url)) return clientGistCache.get(url);
+
+    // 2. Try server REST endpoint (server queues & generates it)
+    try {
+      const params = new URLSearchParams({ url, title, type });
+      const res = await fetch(`/api/gist?${params}`);
+      if(res.ok){
+        const data = await res.json();
+        if(data.gist){ clientGistCache.set(url, data.gist); return data.gist; }
+      }
+    } catch(_) {}
+
+    // 3. Direct Anthropic call as last resort (standalone / no server)
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: 'You are FOOTINT, a football intelligence terminal AI. Given a football news headline, write a concise 2-3 sentence intel brief. Be analytical, data-driven, punchy. No intro phrases. No markdown. Plain text only.',
-          messages: [{ role: 'user', content: `Headline: "${headline}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
+          max_tokens: 120,
+          system: 'You are FOOTINT, a football intelligence terminal AI. Given a football news headline, write a punchy 2-sentence intel brief. No intro phrases. No markdown. Plain text only.',
+          messages: [{ role: 'user', content: `Headline: "${title}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
         })
       });
       const data = await res.json();
-      const text = data?.content?.[0]?.text || '';
-      if(text){
-        gistEl.textContent = text;
-      } else {
-        gistEl.textContent = 'SIGNAL ANALYSIS UNAVAILABLE — CHECK SOURCE DIRECTLY.';
-      }
-    } catch(e) {
-      gistEl.textContent = 'UPLINK INTERRUPTED — INTELLIGENCE FEED OFFLINE.';
+      const text = data?.content?.[0]?.text?.trim() || '';
+      if(text){ clientGistCache.set(url, text); return text; }
+    } catch(_) {}
+
+    return 'SIGNAL ANALYSIS UNAVAILABLE — CHECK SOURCE DIRECTLY.';
+  }
+
+  async function fetchGist(url, headline, type){
+    gistEl.innerHTML = '<div class="idp-loading"><div class="idp-spinner"></div>GENERATING ANALYSIS...</div>';
+    const gist = await resolveGist(url, headline, type);
+    // Only update if this panel is still showing the same article
+    if(linkEl.href === url || linkEl.getAttribute('href') === url){
+      gistEl.textContent = gist;
     }
   }
 
@@ -3780,8 +3818,8 @@ window.FOOTINT_ARC_PATCH = {
     // Open panel
     panel.classList.add('idp-open');
 
-    // AI gist
-    fetchGist(title, type);
+    // AI gist — server-backed with REST + direct fallback
+    fetchGist(url || '#', title, type);
   };
 
   // ── Patch feed injection to make items clickable ──
