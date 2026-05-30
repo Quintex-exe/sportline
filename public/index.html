@@ -1371,6 +1371,188 @@ This file is prepared to consume exact lat/lng data emitted by the backend.
     </div>
     <div class="tb-right">
       <div id="utc-clock">UTC 00:00:00</div>
+      <div id="overlays-btn">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" stroke="#39ff6a" stroke-width="1.1"/>
+          <rect x="7" y="1" width="5" height="5" rx="1" stroke="#5af5ff" stroke-width="1.1" stroke-dasharray="1.5 1"/>
+          <rect x="1" y="7" width="5" height="5" rx="1" stroke="#5af5ff" stroke-width="1.1" stroke-dasharray="1.5 1"/>
+          <rect x="7" y="7" width="5" height="5" rx="1" stroke="#39ff6a" stroke-width="1.1"/>
+        </svg>
+        OVERLAYS
+        <span id="overlays-chevron">▾</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OVERLAYS DROPDOWN ─────────────────────────────────── -->
+  <div id="overlays-dropdown">
+    <div class="ovd-header">
+      <div class="ovd-title-row">
+        <svg width="10" height="10" viewBox="0 0 13 13" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" stroke="#39ff6a" stroke-width="1.2"/>
+          <rect x="7" y="1" width="5" height="5" rx="1" stroke="#5af5ff" stroke-width="1.2" stroke-dasharray="1.5 1"/>
+          <rect x="1" y="7" width="5" height="5" rx="1" stroke="#5af5ff" stroke-width="1.2" stroke-dasharray="1.5 1"/>
+          <rect x="7" y="7" width="5" height="5" rx="1" stroke="#39ff6a" stroke-width="1.2"/>
+        </svg>
+        <span>OVERLAYS</span>
+      </div>
+      <div class="ovd-hint">FOOTBALL INTELLIGENCE LAYERS</div>
+    </div>
+
+    <div class="ovd-section-label">PANELS</div>
+
+    <div class="ovd-row" data-overlay="player-market">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1L9 5H13L10 8L11 12L7 10L3 12L4 8L1 5H5Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Player Market</span>
+          <span class="ovd-row-sub">Transfer values · live %Δ</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="player-market">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="osint-video-panel">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="3" width="9" height="8" rx="1.5" stroke="currentColor" stroke-width="1"/>
+          <path d="M10 6L13 4.5V9.5L10 8V6Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Video Intel</span>
+          <span class="ovd-row-sub">Open source video feed</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="osint-video-panel">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="source-panel">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1"/>
+          <path d="M7 1V3M7 11V13M1 7H3M11 7H13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          <path d="M3 3L4.5 4.5M9.5 9.5L11 11M3 11L4.5 9.5M9.5 4.5L11 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Live X Sources</span>
+          <span class="ovd-row-sub">Real-time social signals</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="source-panel">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="intel-minimap">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1"/>
+          <circle cx="4" cy="5" r="1" fill="currentColor" opacity="0.7"/>
+          <circle cx="8" cy="4" r="1" fill="currentColor" opacity="0.7"/>
+          <circle cx="10" cy="8" r="1" fill="currentColor" opacity="0.7"/>
+          <circle cx="5" cy="9" r="1" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Global Activity Grid</span>
+          <span class="ovd-row-sub">Worldwide event heatmap</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="intel-minimap">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="signal-panel">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <path d="M1 11C2.5 8 4.5 6 7 6C9.5 6 11.5 8 13 11" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          <path d="M3.5 11C4.5 9 5.7 8 7 8C8.3 8 9.5 9 10.5 11" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="7" cy="11" r="1" fill="currentColor"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Signal Status</span>
+          <span class="ovd-row-sub">Feed health · match stats</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="signal-panel">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="intel-footer">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="4" width="12" height="6" rx="1" stroke="currentColor" stroke-width="1"/>
+          <path d="M3 7H5M7 7H9M11 7H11.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Network Status</span>
+          <span class="ovd-row-sub">Uplink · latency · flow</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="intel-footer">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="system-console">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="2" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1"/>
+          <path d="M3 6L5 8L3 10M6 10H9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">System Console</span>
+          <span class="ovd-row-sub">Debug · event log</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="system-console">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-row" data-overlay="player-tracker-panel">
+      <div class="ovd-row-left">
+        <svg class="ovd-icon" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1"/>
+          <path d="M2 13C2 10.2 4.2 8 7 8C9.8 8 12 10.2 12 13" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        <div class="ovd-row-info">
+          <span class="ovd-row-name">Player Tracker</span>
+          <span class="ovd-row-sub">Live position · drift</span>
+        </div>
+      </div>
+      <div class="ovd-toggle" data-overlay="player-tracker-panel">
+        <div class="ovd-toggle-track">
+          <div class="ovd-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ovd-section-label" style="margin-top:10px">QUICK ACTIONS</div>
+    <div class="ovd-action-row">
+      <div class="ovd-action-btn" id="ovd-show-all">SHOW ALL</div>
+      <div class="ovd-action-btn" id="ovd-hide-all">HIDE ALL</div>
     </div>
   </div>
 
@@ -4239,6 +4421,393 @@ window.FOOTINT_ARC_PATCH = {
     }
   }
   setInterval(driftPlayers, 10000 + Math.random() * 5000);
+
+})();
+</script>
+
+<!-- ── OVERLAYS DROPDOWN STYLES ──────────────────────────────── -->
+<style>
+  /* ── Trigger button in top bar ── */
+  #overlays-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #39ff6a;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid rgba(57,255,106,0.2);
+    border-radius: 5px;
+    background: rgba(57,255,106,0.05);
+    transition: all .18s ease;
+    user-select: none;
+    position: relative;
+    z-index: 600;
+  }
+
+  #overlays-btn:hover {
+    background: rgba(57,255,106,0.1);
+    border-color: rgba(57,255,106,0.35);
+    box-shadow: 0 0 12px rgba(57,255,106,0.12);
+  }
+
+  #overlays-btn.active {
+    background: rgba(57,255,106,0.1);
+    border-color: rgba(57,255,106,0.4);
+    box-shadow: 0 0 16px rgba(57,255,106,0.15);
+  }
+
+  #overlays-chevron {
+    font-size: 9px;
+    transition: transform .2s ease;
+    display: inline-block;
+  }
+
+  #overlays-btn.active #overlays-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel ── */
+  #overlays-dropdown {
+    position: fixed;
+    top: 50px;
+    right: 14px;
+    width: 272px;
+    background: rgba(3,12,10,0.97);
+    border: 1px solid rgba(57,255,106,0.15);
+    border-radius: 9px;
+    z-index: 590;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(57,255,106,0.04) inset;
+    font-family: 'Share Tech Mono', monospace;
+    transform-origin: top right;
+    transform: scale(0.94) translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform .2s cubic-bezier(.16,1,.3,1), opacity .18s ease;
+    overflow: hidden;
+  }
+
+  #overlays-dropdown.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Header */
+  .ovd-header {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid rgba(57,255,106,0.07);
+  }
+
+  .ovd-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #39ff6a;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(57,255,106,0.4);
+    margin-bottom: 3px;
+  }
+
+  .ovd-hint {
+    font-size: 8px;
+    color: #2d5040;
+    letter-spacing: 1.5px;
+  }
+
+  /* Section label */
+  .ovd-section-label {
+    font-size: 7.5px;
+    color: #2d4f3d;
+    letter-spacing: 2.5px;
+    padding: 8px 14px 4px;
+  }
+
+  /* Row */
+  .ovd-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: background .14s ease;
+  }
+
+  .ovd-row:last-of-type { border-bottom: none; }
+
+  .ovd-row:hover { background: rgba(57,255,106,0.03); }
+
+  .ovd-row-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .ovd-icon {
+    width: 16px;
+    height: 16px;
+    color: #3a6b52;
+    flex-shrink: 0;
+    transition: color .15s ease;
+  }
+
+  .ovd-row.ov-on .ovd-icon { color: #39ff6a; }
+
+  .ovd-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .ovd-row-name {
+    font-size: 10px;
+    color: #a0ccb4;
+    letter-spacing: 0.5px;
+  }
+
+  .ovd-row.ov-on .ovd-row-name { color: #d0f0e0; }
+
+  .ovd-row-sub {
+    font-size: 7.5px;
+    color: #2d4f3d;
+    letter-spacing: 0.8px;
+  }
+
+  /* Toggle pill */
+  .ovd-toggle { cursor: pointer; }
+
+  .ovd-toggle-track {
+    width: 30px;
+    height: 16px;
+    border-radius: 8px;
+    background: rgba(57,255,106,0.06);
+    border: 1px solid rgba(57,255,106,0.12);
+    position: relative;
+    transition: background .2s ease, border-color .2s ease;
+  }
+
+  .ovd-toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a5e4c;
+    transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+
+  .ovd-row.ov-on .ovd-toggle-track {
+    background: rgba(57,255,106,0.15);
+    border-color: rgba(57,255,106,0.35);
+  }
+
+  .ovd-row.ov-on .ovd-toggle-knob {
+    transform: translateX(14px);
+    background: #39ff6a;
+    box-shadow: 0 0 8px rgba(57,255,106,0.7);
+  }
+
+  /* Active dot on icon area when panel is visible */
+  .ovd-row.ov-on::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    background: #39ff6a;
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 6px rgba(57,255,106,0.8);
+  }
+
+  .ovd-row { position: relative; }
+
+  /* Quick actions */
+  .ovd-action-row {
+    display: flex;
+    gap: 8px;
+    padding: 8px 14px 12px;
+  }
+
+  .ovd-action-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: #3a6b52;
+    border: 1px solid rgba(57,255,106,0.1);
+    border-radius: 4px;
+    padding: 5px 0;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+
+  .ovd-action-btn:hover {
+    color: #39ff6a;
+    border-color: rgba(57,255,106,0.3);
+    background: rgba(57,255,106,0.06);
+  }
+
+  /* Counter badge on trigger */
+  #ovd-active-count {
+    background: #39ff6a;
+    color: #030809;
+    border-radius: 8px;
+    font-size: 8px;
+    padding: 1px 5px;
+    font-weight: 700;
+    min-width: 16px;
+    text-align: center;
+    line-height: 14px;
+  }
+</style>
+
+<script>
+(function(){
+  // Map: overlay-id → { show, hide } functions
+  // "show" makes it visible, "hide" makes it invisible
+  // Each panel has slightly different visibility mechanism — unify here.
+
+  function panelVis(id, show){
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(show){
+      el.style.display = '';
+      el.style.opacity = '1';
+      el.style.transform = '';
+      el.style.pointerEvents = '';
+      // Remove hidden classes some panels use
+      el.classList.remove('ov-hidden');
+    } else {
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.94)';
+      el.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if(el.style.opacity === '0') el.style.display = 'none';
+      }, 200);
+    }
+  }
+
+  // Add smooth transition to all managed panels
+  const PANEL_IDS = [
+    'player-market',
+    'osint-video-panel',
+    'source-panel',
+    'intel-minimap',
+    'signal-panel',
+    'intel-footer',
+    'system-console',
+    'player-tracker-panel',
+  ];
+
+  PANEL_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.transition = 'opacity .2s ease, transform .2s ease';
+  });
+
+  // State: which panels are currently ON
+  const state = {};
+  PANEL_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    // Detect initial visibility
+    const style = window.getComputedStyle(el || document.body);
+    state[id] = el ? (style.display !== 'none') : false;
+  });
+
+  // ── Dropdown open/close ───────────────────────────────────────
+  const btn      = document.getElementById('overlays-btn');
+  const dropdown = document.getElementById('overlays-dropdown');
+  let open = false;
+
+  function openDropdown(){
+    open = true;
+    dropdown.classList.add('open');
+    btn.classList.add('active');
+    syncToggles();
+  }
+
+  function closeDropdown(){
+    open = false;
+    dropdown.classList.remove('open');
+    btn.classList.remove('active');
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    open ? closeDropdown() : openDropdown();
+  });
+
+  document.addEventListener('click', e => {
+    if(open && !dropdown.contains(e.target) && e.target !== btn) closeDropdown();
+  });
+
+  // ── Sync toggle UI to actual state ──────────────────────────
+  function syncToggles(){
+    document.querySelectorAll('.ovd-row[data-overlay]').forEach(row => {
+      const id = row.dataset.overlay;
+      const on = state[id];
+      row.classList.toggle('ov-on', !!on);
+    });
+    updateCount();
+  }
+
+  function updateCount(){
+    const count = Object.values(state).filter(Boolean).length;
+    let badge = document.getElementById('ovd-active-count');
+    if(!badge){
+      badge = document.createElement('span');
+      badge.id = 'ovd-active-count';
+      btn.insertBefore(badge, btn.querySelector('#overlays-chevron'));
+    }
+    badge.textContent = count;
+    badge.style.display = count > 0 ? '' : 'none';
+  }
+
+  // ── Toggle click ─────────────────────────────────────────────
+  document.querySelectorAll('.ovd-row[data-overlay], .ovd-toggle[data-overlay]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      // Get the overlay id from closest row
+      const row = el.closest('.ovd-row[data-overlay]') || el;
+      const id  = row.dataset.overlay || el.dataset.overlay;
+      if(!id) return;
+      const nowOn = !state[id];
+      state[id] = nowOn;
+      panelVis(id, nowOn);
+
+      // Special handling: player-tracker-panel also needs its toggle btn styling
+      if(id === 'player-tracker-panel'){
+        const tBtn = document.getElementById('player-tracker-toggle');
+        if(tBtn) tBtn.classList.toggle('active', nowOn);
+      }
+
+      syncToggles();
+    });
+  });
+
+  // ── Show all / Hide all ───────────────────────────────────────
+  document.getElementById('ovd-show-all').addEventListener('click', e => {
+    e.stopPropagation();
+    PANEL_IDS.forEach(id => { state[id] = true; panelVis(id, true); });
+    syncToggles();
+  });
+
+  document.getElementById('ovd-hide-all').addEventListener('click', e => {
+    e.stopPropagation();
+    PANEL_IDS.forEach(id => { state[id] = false; panelVis(id, false); });
+    syncToggles();
+  });
+
+  // ── Init ─────────────────────────────────────────────────────
+  syncToggles();
 
 })();
 </script>
