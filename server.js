@@ -25,15 +25,15 @@ app.use(express.static('public'));
 // Persistent queue — every new article gets an AI gist generated server-side.
 // Rate-limited to 1 req / 800ms so the queue drains continuously without throttle.
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || 'YOUR_API_KEY_HERE';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'YOUR_OPENROUTER_KEY_HERE';
 const gistCache = new Map();   // link → gist string
 const gistQueue = [];          // { link, title, type, resolve }
 let gistBusy = false;
 
-async function anthropicRequest(title, type) {
+async function openRouterRequest(title, type) {
   return new Promise((resolve) => {
-    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
-      return resolve('ANTHROPIC_API_KEY not set — add it to your environment.');
+    if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'YOUR_OPENROUTER_KEY_HERE') {
+      return resolve('OPENROUTER_API_KEY not set — add it to your environment.');
     }
 
     const body = JSON.stringify({
@@ -49,7 +49,7 @@ async function anthropicRequest(title, type) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
+        'x-api-key': OPENROUTER_API_KEY,
         'anthropic-version': '2023-06-01',
         'Content-Length': Buffer.byteLength(body)
       }
@@ -91,7 +91,7 @@ async function drainGistQueue() {
   }
 
   try {
-    const gist = await anthropicRequest(job.title, job.type);
+    const gist = await openRouterRequest(job.title, job.type);
     gistCache.set(job.link, gist);
     job.resolve(gist);
     console.log(`[GIST OK] ${job.type.toUpperCase()} | ${gist.slice(0, 70)}…`);
@@ -307,8 +307,8 @@ setInterval(pullFeeds, 30000);
 
 server.listen(3000, () => {
   console.log('FOOTINT running on port 3000');
-  if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
-    console.warn('[WARN] ANTHROPIC_API_KEY not set — gist generation disabled. Set it with: export ANTHROPIC_API_KEY=sk-...');
+  if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'YOUR_OPENROUTER_KEY_HERE') {
+    console.warn('[WARN] OPENROUTER_API_KEY not set — gist generation disabled. Set it with: export OPENROUTER_API_KEY=sk-...');
   } else {
     console.log('[GIST ENGINE] Active — queue draining at 800ms intervals');
   }
