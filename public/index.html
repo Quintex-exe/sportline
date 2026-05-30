@@ -1203,6 +1203,141 @@
   color:#39ff6a;
 }
 
+
+  /* ── PLAYER TRACKER PANEL ── */
+  #player-tracker-toggle {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 170;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(3,12,10,0.88);
+    border: 1px solid rgba(57,255,106,0.14);
+    border-radius: 999px;
+    padding: 5px 14px 5px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: #5af5ff;
+    letter-spacing: 2px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 18px rgba(0,0,0,0.3);
+    transition: all .22s ease;
+    user-select: none;
+  }
+  #player-tracker-toggle:hover {
+    border-color: rgba(90,245,255,0.3);
+    box-shadow: 0 0 22px rgba(90,245,255,0.12);
+  }
+  #player-tracker-toggle.active {
+    background: rgba(90,245,255,0.08);
+    border-color: rgba(90,245,255,0.28);
+    color: #39ff6a;
+  }
+  .pt-toggle-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #5af5ff;
+    box-shadow: 0 0 8px #5af5ff;
+    animation: blink 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  #player-tracker-panel {
+    position: fixed;
+    top: 86px;
+    left: 210px;
+    width: 224px;
+    z-index: 160;
+    background: rgba(3,10,8,0.96);
+    border: 1px solid rgba(90,245,255,0.14);
+    border-radius: 8px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 0 32px rgba(0,0,0,0.5);
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    user-select: none;
+  }
+  #player-tracker-panel.pt-open { display: flex; }
+  #pt-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px 6px;
+    border-bottom: 1px solid rgba(90,245,255,0.07);
+    cursor: grab;
+    flex-shrink: 0;
+  }
+  #pt-panel-header:active { cursor: grabbing; }
+  .pt-header-left {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9px; color: #5af5ff; letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(90,245,255,0.4);
+  }
+  .pt-header-count {
+    font-size: 8px; color: #2d5040; letter-spacing: 1px;
+  }
+  #pt-list {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  #pt-list::-webkit-scrollbar { width: 3px; }
+  #pt-list::-webkit-scrollbar-thumb { background: rgba(90,245,255,0.15); border-radius: 2px; }
+  .pt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .pt-row:last-child { border-bottom: none; }
+  .pt-row:hover { background: rgba(90,245,255,0.04); }
+  .pt-row.pt-focused { background: rgba(90,245,255,0.07); }
+  .pt-avatar-wrap {
+    position: relative; flex-shrink: 0;
+    width: 26px; height: 26px;
+  }
+  .pt-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(90,245,255,0.25);
+    background: rgba(3,20,14,0.9);
+  }
+  .pt-avatar-pulse {
+    position: absolute; inset: -3px;
+    border-radius: 50%;
+    border: 1px solid rgba(57,255,106,0.5);
+    animation: ptAvatarPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes ptAvatarPulse {
+    0%,100% { opacity:0.8; transform:scale(1); }
+    50% { opacity:0.2; transform:scale(1.35); }
+  }
+  .pt-info { flex: 1; min-width: 0; }
+  .pt-name {
+    font-size: 9.5px; color: #c0e8d0; letter-spacing: 0.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pt-loc {
+    font-size: 7.5px; color: #3a6b52; letter-spacing: 0.8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .pt-status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #39ff6a;
+    box-shadow: 0 0 6px #39ff6a;
+    flex-shrink: 0;
+    animation: blink 1.6s ease-in-out infinite;
+  }
 </style>
 <script src="/socket.io/socket.io.js"></script>
 
@@ -1951,6 +2086,11 @@ function drawGlobe() {
 
     ctx.restore();
   }
+
+  // ── Player tracker markers (drawn on top) ──────────────────────────────────
+  if(typeof window.drawPlayerMarkers === 'function'){
+    window.drawPlayerMarkers(ctx, project, latLngTo3D, R);
+  }
 }
 
 // ── Animation loop ───────────────────────────────────────────────────────────
@@ -2002,8 +2142,22 @@ window.addEventListener('mousemove', e => {
     .filter(n => n.pr.depth >= 0)
     .find(n => Math.hypot(n.pr.sx - mx, n.pr.sy - my) < 12);
 
+  // Also check player tracker markers
+  const playerHit = (typeof window.getPlayerAtPoint === 'function')
+    ? window.getPlayerAtPoint(mx, my, project, latLngTo3D)
+    : null;
+
   const tip = document.getElementById('tooltip');
-  if (hit) {
+  if (playerHit) {
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 16) + 'px';
+    tip.style.top  = (e.clientY - 10) + 'px';
+    tip.innerHTML =
+      `<span style="color:#5af5ff;font-weight:700">${playerHit.name}</span><br>` +
+      `<span style="color:#7a9e88">${playerHit.club}</span><br>` +
+      `<span style="color:#2a5040">${playerHit.pos} · ${playerHit.nation}</span><br>` +
+      `<span style="color:#39ff6a;font-size:9px">● LIVE LOCATION</span>`;
+  } else if (hit) {
     tip.style.display = 'block';
     tip.style.left = (e.clientX + 16) + 'px';
     tip.style.top  = (e.clientY - 10) + 'px';
@@ -2882,13 +3036,13 @@ function renderCachedFeed(event){
 
 // cached old feed
 socket.on('initial-feed', feeds => {
+
   feeds.reverse().forEach(event => {
-    // Cache any pre-generated gists from the server
-    if(event.url && event.gist && typeof clientGistCache !== 'undefined'){
-      clientGistCache.set(event.url, event.gist);
-    }
+
     renderCachedFeed(event);
+
   });
+
 });
 
 // live incoming feed
@@ -2918,11 +3072,6 @@ socket.on('intel-event', event => {
       type: event.type || 'match',
       progress: 0
     });
-  }
-
-  // Cache gist if server already generated it
-  if(event.url && event.gist && typeof clientGistCache !== 'undefined'){
-    clientGistCache.set(event.url, event.gist);
   }
 
   renderCachedFeed(event);
@@ -3729,62 +3878,29 @@ window.FOOTINT_ARC_PATCH = {
     `).join('');
   }
 
-  // ── Client-side gist cache (populated by server via socket) ──
-  const clientGistCache = new Map(); // url → gist string
-
-  // Listen for server-generated gists arriving via socket
-  // Works for both live events (intel-gist) and initial feed (gist field on payload)
-  if(typeof socket !== 'undefined'){
-    socket.on('intel-gist', ({ url, gist }) => {
-      clientGistCache.set(url, gist);
-      // If the detail panel is open and showing this article, update it live
-      if(panel.classList.contains('idp-open') && linkEl.href === url){
-        gistEl.textContent = gist;
-      }
-    });
-  }
-
-  // ── Gist resolver: server socket → REST fallback → Anthropic direct fallback ──
-  async function resolveGist(url, title, type){
-    // 1. Already received via socket?
-    if(clientGistCache.has(url)) return clientGistCache.get(url);
-
-    // 2. Try server REST endpoint (server queues & generates it)
-    try {
-      const params = new URLSearchParams({ url, title, type });
-      const res = await fetch(`/api/gist?${params}`);
-      if(res.ok){
-        const data = await res.json();
-        if(data.gist){ clientGistCache.set(url, data.gist); return data.gist; }
-      }
-    } catch(_) {}
-
-    // 3. Direct Anthropic call as last resort (standalone / no server)
+  // ── AI gist via Anthropic API ──
+  async function fetchGist(headline, type){
+    gistEl.innerHTML = '<div class="idp-loading"><div class="idp-spinner"></div>GENERATING ANALYSIS...</div>';
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 120,
-          system: 'You are FOOTINT, a football intelligence terminal AI. Given a football news headline, write a punchy 2-sentence intel brief. No intro phrases. No markdown. Plain text only.',
-          messages: [{ role: 'user', content: `Headline: "${title}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
+          max_tokens: 1000,
+          system: 'You are FOOTINT, a football intelligence terminal AI. Given a football news headline, write a concise 2-3 sentence intel brief. Be analytical, data-driven, punchy. No intro phrases. No markdown. Plain text only.',
+          messages: [{ role: 'user', content: `Headline: "${headline}"\nType: ${type}\nWrite the FOOTINT intel brief.` }]
         })
       });
       const data = await res.json();
-      const text = data?.content?.[0]?.text?.trim() || '';
-      if(text){ clientGistCache.set(url, text); return text; }
-    } catch(_) {}
-
-    return 'SIGNAL ANALYSIS UNAVAILABLE — CHECK SOURCE DIRECTLY.';
-  }
-
-  async function fetchGist(url, headline, type){
-    gistEl.innerHTML = '<div class="idp-loading"><div class="idp-spinner"></div>GENERATING ANALYSIS...</div>';
-    const gist = await resolveGist(url, headline, type);
-    // Only update if this panel is still showing the same article
-    if(linkEl.href === url || linkEl.getAttribute('href') === url){
-      gistEl.textContent = gist;
+      const text = data?.content?.[0]?.text || '';
+      if(text){
+        gistEl.textContent = text;
+      } else {
+        gistEl.textContent = 'SIGNAL ANALYSIS UNAVAILABLE — CHECK SOURCE DIRECTLY.';
+      }
+    } catch(e) {
+      gistEl.textContent = 'UPLINK INTERRUPTED — INTELLIGENCE FEED OFFLINE.';
     }
   }
 
@@ -3818,8 +3934,8 @@ window.FOOTINT_ARC_PATCH = {
     // Open panel
     panel.classList.add('idp-open');
 
-    // AI gist — server-backed with REST + direct fallback
-    fetchGist(url || '#', title, type);
+    // AI gist
+    fetchGist(title, type);
   };
 
   // ── Patch feed injection to make items clickable ──
@@ -3885,4 +4001,235 @@ window.FOOTINT_ARC_PATCH = {
 
 })();
 </script>
+
+<!-- ── PLAYER TRACKER PANEL HTML ── -->
+<div id="player-tracker-toggle">
+  <span class="pt-toggle-dot"></span>
+  PLAYER TRACKER
+</div>
+
+<div id="player-tracker-panel">
+  <div id="pt-panel-header">
+    <div class="pt-header-left">
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+        <circle cx="4.5" cy="4.5" r="3.5" stroke="#5af5ff" stroke-width="0.9"/>
+        <circle cx="4.5" cy="4.5" r="1.2" fill="#39ff6a"/>
+      </svg>
+      LIVE LOCATIONS
+    </div>
+    <span class="pt-header-count" id="pt-count">20 PLAYERS</span>
+  </div>
+  <div id="pt-list"></div>
+</div>
+
+<!-- ── PLAYER TRACKER JS ── -->
+<script>
+(function(){
+
+  // ── Player data: real clubs & home-city coordinates ──────────────────────────
+  // Locations are their club's city (realistic "last known location")
+  // with tiny per-player jitter so markers don't stack exactly
+  const PLAYERS = [
+    { id:'mbappe',    name:'Mbappé',       club:'Real Madrid',      nation:'FRA', pos:'FW', lat:40.416 + 0.02,  lng:-3.703 + 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/342229-1682683695.jpg' },
+    { id:'vinicius',  name:'Vinicius Jr',  club:'Real Madrid',      nation:'BRA', pos:'FW', lat:40.416 - 0.02,  lng:-3.703 - 0.02,  img:'https://img.a.transfermarkt.technology/portrait/medium/371998-1682683695.jpg' },
+    { id:'bellingham',name:'Bellingham',   club:'Real Madrid',      nation:'ENG', pos:'MF', lat:40.416 + 0.01,  lng:-3.703 + 0.03,  img:'https://img.a.transfermarkt.technology/portrait/medium/581678-1682683695.jpg' },
+    { id:'haaland',   name:'Haaland',      club:'Man City',         nation:'NOR', pos:'FW', lat:53.483 + 0.01,  lng:-2.200 - 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/418560-1698843134.jpg' },
+    { id:'pedri',     name:'Pedri',        club:'Barcelona',        nation:'ESP', pos:'MF', lat:41.381 + 0.01,  lng:2.181 + 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/557782-1682683695.jpg' },
+    { id:'yamal',     name:'L. Yamal',     club:'Barcelona',        nation:'ESP', pos:'FW', lat:41.381 - 0.02,  lng:2.181 - 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/939728-1701091698.jpg' },
+    { id:'saka',      name:'Saka',         club:'Arsenal',          nation:'ENG', pos:'FW', lat:51.555 + 0.01,  lng:-0.108 + 0.02,  img:'https://img.a.transfermarkt.technology/portrait/medium/590249-1682683695.jpg' },
+    { id:'odegaard',  name:'Ødegaard',     club:'Arsenal',          nation:'NOR', pos:'MF', lat:51.555 - 0.01,  lng:-0.108 - 0.02,  img:'https://img.a.transfermarkt.technology/portrait/medium/316264-1682683695.jpg' },
+    { id:'salah',     name:'Salah',        club:'Liverpool',        nation:'EGY', pos:'FW', lat:53.431 + 0.01,  lng:-2.961 + 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/148455-1698843134.jpg' },
+    { id:'wirtz',     name:'Wirtz',        club:'B. Leverkusen',    nation:'GER', pos:'MF', lat:51.022 + 0.01,  lng:7.002 - 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/521361-1682683695.jpg' },
+    { id:'kane',      name:'Kane',         club:'Bayern München',   nation:'ENG', pos:'FW', lat:48.218 + 0.01,  lng:11.625 - 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/132098-1698843134.jpg' },
+    { id:'musiala',   name:'Musiala',      club:'Bayern München',   nation:'GER', pos:'MF', lat:48.218 - 0.01,  lng:11.625 + 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/580195-1682683695.jpg' },
+    { id:'rodri',     name:'Rodri',        club:'Man City',         nation:'ESP', pos:'MF', lat:53.483 - 0.01,  lng:-2.200 + 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/357565-1682683695.jpg' },
+    { id:'lamine',    name:'De Bruyne',    club:'Man City',         nation:'BEL', pos:'MF', lat:53.483 + 0.02,  lng:-2.200 - 0.02,  img:'https://img.a.transfermarkt.technology/portrait/medium/88755-1698843134.jpg' },
+    { id:'dembele',   name:'Dembélé',      club:'PSG',              nation:'FRA', pos:'FW', lat:48.924 + 0.01,  lng:2.332 - 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/200512-1698843134.jpg' },
+    { id:'vitinha',   name:'Vitinha',      club:'PSG',              nation:'POR', pos:'MF', lat:48.924 - 0.01,  lng:2.332 + 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/550680-1682683695.jpg' },
+    { id:'gyokeres',  name:'Gyökeres',     club:'Sporting CP',      nation:'SWE', pos:'FW', lat:38.762 + 0.01,  lng:-9.157 - 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/366921-1682683695.jpg' },
+    { id:'diaz',      name:'L. Díaz',      club:'Liverpool',        nation:'COL', pos:'FW', lat:53.431 - 0.01,  lng:-2.961 - 0.01,  img:'https://img.a.transfermarkt.technology/portrait/medium/480692-1682683695.jpg' },
+    { id:'raphinha',  name:'Raphinha',     club:'Barcelona',        nation:'BRA', pos:'FW', lat:41.381 + 0.02,  lng:2.181 - 0.02,   img:'https://img.a.transfermarkt.technology/portrait/medium/338079-1682683695.jpg' },
+    { id:'vlahovic',  name:'Vlahović',     club:'Juventus',         nation:'SRB', pos:'FW', lat:45.110 + 0.01,  lng:7.623 - 0.01,   img:'https://img.a.transfermarkt.technology/portrait/medium/537119-1682683695.jpg' },
+  ];
+
+  // Pre-load images into off-screen Image objects
+  const playerImgs = {};
+  PLAYERS.forEach(p => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = p.img;
+    playerImgs[p.id] = img;
+  });
+
+  // Track focused player
+  let focusedPlayerId = null;
+  let trackerEnabled = true;
+
+  // ── Draw player markers on globe ─────────────────────────────────────────────
+  // Called from within drawGlobe via the patched tick
+  window.drawPlayerMarkers = function(ctx, project, latLngTo3D, R) {
+    if(!trackerEnabled) return;
+
+    PLAYERS.forEach(p => {
+      const pt = project(latLngTo3D(p.lat, p.lng));
+      if(pt.depth < 0) return;  // behind the globe
+
+      const { sx, sy } = pt;
+      const focused = (p.id === focusedPlayerId);
+      const r = focused ? 14 : 10;
+
+      ctx.save();
+
+      // Outer glow ring
+      ctx.beginPath();
+      ctx.arc(sx, sy, r + 4, 0, Math.PI * 2);
+      ctx.fillStyle = focused ? 'rgba(57,255,106,0.12)' : 'rgba(90,245,255,0.07)';
+      ctx.fill();
+
+      // Pulsing ring
+      const pulseScale = 1 + 0.18 * Math.sin(Date.now() * 0.003 + p.lat);
+      ctx.beginPath();
+      ctx.arc(sx, sy, (r + 5) * pulseScale, 0, Math.PI * 2);
+      ctx.strokeStyle = focused ? 'rgba(57,255,106,0.45)' : 'rgba(90,245,255,0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // Avatar circle clip
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.clip();
+
+      const img = playerImgs[p.id];
+      if(img && img.complete && img.naturalWidth > 0){
+        ctx.drawImage(img, sx - r, sy - r, r * 2, r * 2);
+      } else {
+        // Fallback: initials
+        ctx.fillStyle = focused ? 'rgba(10,40,24,0.96)' : 'rgba(3,20,14,0.96)';
+        ctx.fill();
+        ctx.fillStyle = focused ? '#39ff6a' : '#5af5ff';
+        ctx.font = `bold ${r * 0.72}px 'Share Tech Mono', monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.name.slice(0,2).toUpperCase(), sx, sy);
+      }
+
+      // Border ring on top
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = focused ? 'rgba(57,255,106,0.9)' : 'rgba(90,245,255,0.5)';
+      ctx.lineWidth = focused ? 1.5 : 1;
+      ctx.shadowColor = focused ? '#39ff6a' : '#5af5ff';
+      ctx.shadowBlur = focused ? 12 : 6;
+      ctx.stroke();
+
+      // Small location dot below
+      ctx.beginPath();
+      ctx.arc(sx, sy + r + 3, 2, 0, Math.PI * 2);
+      ctx.fillStyle = focused ? '#39ff6a' : '#5af5ff';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+
+      ctx.restore();
+    });
+  };
+
+  // ── Patch globe tooltip to also hit player markers ────────────────────────────
+  window.getPlayerAtPoint = function(mx, my, project, latLngTo3D) {
+    if(!trackerEnabled) return null;
+    for(const p of PLAYERS){
+      const pt = project(latLngTo3D(p.lat, p.lng));
+      if(pt.depth < 0) continue;
+      if(Math.hypot(pt.sx - mx, pt.sy - my) < 14) return p;
+    }
+    return null;
+  };
+
+  // ── Build panel rows ──────────────────────────────────────────────────────────
+  const list = document.getElementById('pt-list');
+
+  function buildPanel(){
+    list.innerHTML = '';
+    PLAYERS.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'pt-row';
+      row.id = 'pt-row-' + p.id;
+      row.innerHTML = `
+        <div class="pt-avatar-wrap">
+          <img class="pt-avatar" src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
+          <div class="pt-avatar-pulse"></div>
+        </div>
+        <div class="pt-info">
+          <div class="pt-name">${p.name}</div>
+          <div class="pt-loc">${p.club} · ${p.pos}</div>
+        </div>
+        <div class="pt-status-dot"></div>
+      `;
+      row.addEventListener('click', () => {
+        focusedPlayerId = (focusedPlayerId === p.id) ? null : p.id;
+        document.querySelectorAll('.pt-row').forEach(r => r.classList.remove('pt-focused'));
+        if(focusedPlayerId) row.classList.add('pt-focused');
+      });
+      list.appendChild(row);
+    });
+  }
+
+  buildPanel();
+
+  // ── Toggle button ─────────────────────────────────────────────────────────────
+  const toggleBtn = document.getElementById('player-tracker-toggle');
+  const panel = document.getElementById('player-tracker-panel');
+
+  toggleBtn.addEventListener('click', () => {
+    trackerEnabled = !trackerEnabled;
+    toggleBtn.classList.toggle('active', trackerEnabled);
+    panel.classList.toggle('pt-open', trackerEnabled);
+  });
+
+  // Start open
+  trackerEnabled = true;
+  toggleBtn.classList.add('active');
+  panel.classList.add('pt-open');
+
+  // ── Drag panel ───────────────────────────────────────────────────────────────
+  let dragging = false, ox = 0, oy = 0;
+  const header = document.getElementById('pt-panel-header');
+
+  header.addEventListener('mousedown', e => {
+    dragging = true;
+    const r = panel.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    let nx = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, e.clientX - ox));
+    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - oy));
+    panel.style.left = nx + 'px';
+    panel.style.top  = ny + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    document.body.style.userSelect = '';
+  });
+
+  // ── Location drift simulation ─────────────────────────────────────────────────
+  // Every 8–15s, one random player "moves" slightly (simulates live tracking)
+  function driftPlayers(){
+    const p = PLAYERS[Math.floor(Math.random() * PLAYERS.length)];
+    p.lat += (Math.random() - 0.5) * 0.008;
+    p.lng += (Math.random() - 0.5) * 0.008;
+    const row = document.getElementById('pt-row-' + p.id);
+    if(row){
+      row.style.background = 'rgba(57,255,106,0.06)';
+      setTimeout(() => { row.style.background = ''; }, 600);
+    }
+  }
+  setInterval(driftPlayers, 10000 + Math.random() * 5000);
+
+})();
+</script>
+
 </body>
