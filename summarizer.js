@@ -50,9 +50,25 @@ const DOMAIN_BOOST = {
   'here we go':10, medical:9, physicals:9, agreement:8
 };
 
+// ── SSRF guard: block private / loopback / link-local addresses ─────────────
+const SSRF_BLOCKED = /^(localhost|.*\.local|0\.0\.0\.0|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+|::1|fc..|fd..)$/i;
+
+function isSafeUrl(rawUrl) {
+  try {
+    const { protocol, hostname } = new URL(rawUrl);
+    if (!['http:', 'https:'].includes(protocol)) return false;
+    if (SSRF_BLOCKED.test(hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ── Fetch article HTML ───────────────────────────────────────────────────────
-function fetchHTML(rawUrl, timeoutMs = 6000) {
+function fetchHTML(rawUrl, timeoutMs = 6000, _redirects = 0) {
   return new Promise((resolve) => {
+    if (_redirects > 3) return resolve(null); // max redirect depth
+    if (!isSafeUrl(rawUrl)) return resolve(null); // SSRF guard
     try {
       const parsed = new URL(rawUrl);
       const lib = parsed.protocol === 'https:' ? https : http;
@@ -68,9 +84,9 @@ function fetchHTML(rawUrl, timeoutMs = 6000) {
           timeout: timeoutMs
         },
         (res) => {
-          // Follow single redirect
+          // Follow redirect with SSRF-safe target check
           if ([301,302,303,307,308].includes(res.statusCode) && res.headers.location) {
-            return fetchHTML(res.headers.location, timeoutMs).then(resolve);
+            return fetchHTML(res.headers.location, timeoutMs, _redirects + 1).then(resolve);
           }
           if (res.statusCode !== 200) return resolve(null);
 
@@ -89,28 +105,32 @@ function fetchHTML(rawUrl, timeoutMs = 6000) {
 }
 
 // ── Minimal HTML → plain text (no external deps) ────────────────────────────
+// SECURITY: Tags stripped BEFORE entity decoding to prevent double-escaping
+// bypass (e.g. &lt;script&gt; surviving tag strip then decoded to live tag).
+// Tag regexp uses [^<>]+ so a literal '<' inside an "attribute" breaks the
+// match — no well-formed tag can contain a raw '<', per the HTML spec.
 function htmlToText(html) {
   return html
     // Remove script/style/nav/header/footer blocks entirely
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, ' ')
-    .replace(/<header[\s\S]*?<\/header>/gi, ' ')
-    .replace(/<footer[\s\S]*?<\/footer>/gi, ' ')
-    .replace(/<aside[\s\S]*?<\/aside>/gi, ' ')
-    // Block elements → newline
-    .replace(/<\/(p|div|li|h[1-6]|br|tr|blockquote)>/gi, '\n')
-    // Strip remaining tags
-    .replace(/<[^>]+>/g, ' ')
-    // Decode common entities
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+    .replace(/<nav\b[^>]*>[\s\S]*?<\/nav\s*>/gi, ' ')
+    .replace(/<header\b[^>]*>[\s\S]*?<\/header\s*>/gi, ' ')
+    .replace(/<footer\b[^>]*>[\s\S]*?<\/footer\s*>/gi, ' ')
+    .replace(/<aside\b[^>]*>[\s\S]*?<\/aside\s*>/gi, ' ')
+    // Block elements -> newline
+    .replace(/<\/(p|div|li|h[1-6]|br|tr|blockquote)\s*>/gi, '\n')
+    // Strip remaining tags — [^<>]+ rejects malformed tags containing '<'
+    .replace(/<[^<>]+>/g, ' ')
+    // Decode entities AFTER tag stripping — prevents &lt;script&gt; bypass
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
-    .replace(/&ndash;/g, '–')
-    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '\u2013')
+    .replace(/&mdash;/g, '\u2014')
     // Collapse whitespace
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
