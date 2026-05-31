@@ -1249,7 +1249,7 @@
     position: fixed;
     top: 86px;
     left: 210px;
-    width: 224px;
+    width: 248px;
     z-index: 160;
     background: rgba(3,10,8,0.96);
     border: 1px solid rgba(90,245,255,0.14);
@@ -1290,8 +1290,8 @@
   .pt-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
+    gap: 9px;
+    padding: 5px 10px;
     border-bottom: 1px solid rgba(255,255,255,0.025);
     cursor: pointer;
     transition: background .15s ease;
@@ -1301,20 +1301,34 @@
   .pt-row.pt-focused { background: rgba(90,245,255,0.07); }
   .pt-avatar-wrap {
     position: relative; flex-shrink: 0;
-    width: 26px; height: 26px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
   }
   .pt-avatar {
-    width: 26px; height: 26px;
+    width: 32px; height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1.5px solid rgba(90,245,255,0.25);
+    object-position: top center;
+    border: 0;
     background: rgba(3,20,14,0.9);
+    display: block;
+    flex-shrink: 0;
   }
   .pt-avatar-pulse {
     position: absolute; inset: -3px;
     border-radius: 50%;
-    border: 1px solid rgba(57,255,106,0.5);
+    border: 1.5px solid rgba(90,245,255,0.35);
     animation: ptAvatarPulse 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .pt-avatar-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(90,245,255,0.4);
+    pointer-events: none;
   }
   @keyframes ptAvatarPulse {
     0%,100% { opacity:0.8; transform:scale(1); }
@@ -4041,37 +4055,58 @@ window.FOOTINT_ARC_PATCH = {
   // Locations are their club's city (realistic "last known location")
   // with tiny per-player jitter so markers don't stack exactly
   const PLAYERS = [
-    { id:'mbappe',    name:'Mbappé',       club:'Real Madrid',      nation:'FRA', pos:'FW', lat:40.416 + 0.02,  lng:-3.703 + 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/2019129_17_Qu%C3%A9bec_FIFA_World_Cup_Trophy_Tour_Kylian_Mbapp%C3%A9.jpg/440px-2019129_17_Qu%C3%A9bec_FIFA_World_Cup_Trophy_Tour_Kylian_Mbapp%C3%A9.jpg' },
-    { id:'vinicius',  name:'Vinicius Jr',  club:'Real Madrid',      nation:'BRA', pos:'FW', lat:40.416 - 0.02,  lng:-3.703 - 0.02,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Vinicius_Junior_2023.jpg/440px-Vinicius_Junior_2023.jpg' },
-    { id:'bellingham',name:'Bellingham',   club:'Real Madrid',      nation:'ENG', pos:'MF', lat:40.416 + 0.01,  lng:-3.703 + 0.03,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Jude_Bellingham_2023_%28cropped%29.jpg/440px-Jude_Bellingham_2023_%28cropped%29.jpg' },
-    { id:'haaland',   name:'Haaland',      club:'Man City',         nation:'NOR', pos:'FW', lat:53.483 + 0.01,  lng:-2.200 - 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Erling_Haaland_2023.jpg/440px-Erling_Haaland_2023.jpg' },
-    { id:'pedri',     name:'Pedri',        club:'Barcelona',        nation:'ESP', pos:'MF', lat:41.381 + 0.01,  lng:2.181 + 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Pedri_2022_%28cropped%29.jpg/440px-Pedri_2022_%28cropped%29.jpg' },
-    { id:'yamal',     name:'L. Yamal',     club:'Barcelona',        nation:'ESP', pos:'FW', lat:41.381 - 0.02,  lng:2.181 - 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Lamine_Yamal_2024_%28cropped%29.jpg/440px-Lamine_Yamal_2024_%28cropped%29.jpg' },
-    { id:'saka',      name:'Saka',         club:'Arsenal',          nation:'ENG', pos:'FW', lat:51.555 + 0.01,  lng:-0.108 + 0.02,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Bukayo_Saka_2022_%28cropped%29.jpg/440px-Bukayo_Saka_2022_%28cropped%29.jpg' },
-    { id:'odegaard',  name:'Ødegaard',     club:'Arsenal',          nation:'NOR', pos:'MF', lat:51.555 - 0.01,  lng:-0.108 - 0.02,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Martin_%C3%98degaard_2023_%28cropped%29.jpg/440px-Martin_%C3%98degaard_2023_%28cropped%29.jpg' },
-    { id:'salah',     name:'Salah',        club:'Liverpool',        nation:'EGY', pos:'FW', lat:53.431 + 0.01,  lng:-2.961 + 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Mohamed_Salah_2022_%28cropped%29.jpg/440px-Mohamed_Salah_2022_%28cropped%29.jpg' },
-    { id:'wirtz',     name:'Wirtz',        club:'B. Leverkusen',    nation:'GER', pos:'MF', lat:51.022 + 0.01,  lng:7.002 - 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Florian_Wirtz_2023_%28cropped%29.jpg/440px-Florian_Wirtz_2023_%28cropped%29.jpg' },
-    { id:'kane',      name:'Kane',         club:'Bayern München',   nation:'ENG', pos:'FW', lat:48.218 + 0.01,  lng:11.625 - 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Harry_Kane_2023_%28cropped%29.jpg/440px-Harry_Kane_2023_%28cropped%29.jpg' },
-    { id:'musiala',   name:'Musiala',      club:'Bayern München',   nation:'GER', pos:'MF', lat:48.218 - 0.01,  lng:11.625 + 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Jamal_Musiala_2023_%28cropped%29.jpg/440px-Jamal_Musiala_2023_%28cropped%29.jpg' },
-    { id:'rodri',     name:'Rodri',        club:'Man City',         nation:'ESP', pos:'MF', lat:53.483 - 0.01,  lng:-2.200 + 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Rodri_2022_%28cropped%29.jpg/440px-Rodri_2022_%28cropped%29.jpg' },
-    { id:'lamine',    name:'De Bruyne',    club:'Man City',         nation:'BEL', pos:'MF', lat:53.483 + 0.02,  lng:-2.200 - 0.02,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Kevin_De_Bruyne_2023_%28cropped%29.jpg/440px-Kevin_De_Bruyne_2023_%28cropped%29.jpg' },
-    { id:'dembele',   name:'Dembélé',      club:'PSG',              nation:'FRA', pos:'FW', lat:48.924 + 0.01,  lng:2.332 - 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Ousmane_Demb%C3%A9l%C3%A9_2022_%28cropped%29.jpg/440px-Ousmane_Demb%C3%A9l%C3%A9_2022_%28cropped%29.jpg' },
-    { id:'vitinha',   name:'Vitinha',      club:'PSG',              nation:'POR', pos:'MF', lat:48.924 - 0.01,  lng:2.332 + 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Vitinha_2023_%28cropped%29.jpg/440px-Vitinha_2023_%28cropped%29.jpg' },
-    { id:'gyokeres',  name:'Gyökeres',     club:'Sporting CP',      nation:'SWE', pos:'FW', lat:38.762 + 0.01,  lng:-9.157 - 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Viktor_Gyokeres_2024_%28cropped%29.jpg/440px-Viktor_Gyokeres_2024_%28cropped%29.jpg' },
-    { id:'diaz',      name:'L. Díaz',      club:'Liverpool',        nation:'COL', pos:'FW', lat:53.431 - 0.01,  lng:-2.961 - 0.01,  img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Luis_D%C3%ADaz_2022_%28cropped%29.jpg/440px-Luis_D%C3%ADaz_2022_%28cropped%29.jpg' },
-    { id:'raphinha',  name:'Raphinha',     club:'Barcelona',        nation:'BRA', pos:'FW', lat:41.381 + 0.02,  lng:2.181 - 0.02,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Raphinha_2022_%28cropped%29.jpg/440px-Raphinha_2022_%28cropped%29.jpg' },
-    { id:'vlahovic',  name:'Vlahović',     club:'Juventus',         nation:'SRB', pos:'FW', lat:45.110 + 0.01,  lng:7.623 - 0.01,   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Dusan_Vlahovic_2023_%28cropped%29.jpg/440px-Dusan_Vlahovic_2023_%28cropped%29.jpg' },
+    { id:'mbappe',    name:'Mbappé',       club:'Real Madrid',      nation:'FRA', pos:'FW', lat:40.416 + 0.02,  lng:-3.703 + 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/5/57/2019129_17_Qu%C3%A9bec_FIFA_World_Cup_Trophy_Tour_Kylian_Mbapp%C3%A9.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'vinicius',  name:'Vinicius Jr',  club:'Real Madrid',      nation:'BRA', pos:'FW', lat:40.416 - 0.02,  lng:-3.703 - 0.02,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Vinicius_Junior_-_2023_%28cropped%29.jpg/240px-Vinicius_Junior_-_2023_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'bellingham',name:'Bellingham',   club:'Real Madrid',      nation:'ENG', pos:'MF', lat:40.416 + 0.01,  lng:-3.703 + 0.03,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Jude_Bellingham_-_England_2022_%28cropped%29.jpg/240px-Jude_Bellingham_-_England_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'haaland',   name:'Haaland',      club:'Man City',         nation:'NOR', pos:'FW', lat:53.483 + 0.01,  lng:-2.200 - 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Erling_Haaland_2022.jpg/240px-Erling_Haaland_2022.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'pedri',     name:'Pedri',        club:'Barcelona',        nation:'ESP', pos:'MF', lat:41.381 + 0.01,  lng:2.181 + 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Pedri_2021-01-21_%28cropped%29.jpg/240px-Pedri_2021-01-21_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'yamal',     name:'L. Yamal',     club:'Barcelona',        nation:'ESP', pos:'FW', lat:41.381 - 0.02,  lng:2.181 - 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Lamine_Yamal_Euro24_Esp_%28cropped%29.jpg/240px-Lamine_Yamal_Euro24_Esp_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'saka',      name:'Saka',         club:'Arsenal',          nation:'ENG', pos:'FW', lat:51.555 + 0.01,  lng:-0.108 + 0.02,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bukayo_Saka_2022_%28cropped%29.jpg/240px-Bukayo_Saka_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'odegaard',  name:'Ødegaard',     club:'Arsenal',          nation:'NOR', pos:'MF', lat:51.555 - 0.01,  lng:-0.108 - 0.02,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Martin_%C3%98degaard%2C_2022_%28cropped%29.jpg/240px-Martin_%C3%98degaard%2C_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'salah',     name:'Salah',        club:'Liverpool',        nation:'EGY', pos:'FW', lat:53.431 + 0.01,  lng:-2.961 + 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Mohamed_Salah_2018.jpg/240px-Mohamed_Salah_2018.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'wirtz',     name:'Wirtz',        club:'B. Leverkusen',    nation:'GER', pos:'MF', lat:51.022 + 0.01,  lng:7.002 - 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Florian_Wirtz_2022_%28cropped%29.jpg/240px-Florian_Wirtz_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'kane',      name:'Kane',         club:'Bayern München',   nation:'ENG', pos:'FW', lat:48.218 + 0.01,  lng:11.625 - 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Harry_Kane_2022_%28cropped%29.jpg/240px-Harry_Kane_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'musiala',   name:'Musiala',      club:'Bayern München',   nation:'GER', pos:'MF', lat:48.218 - 0.01,  lng:11.625 + 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Jamal_Musiala_2023_%28cropped%29.jpg/240px-Jamal_Musiala_2023_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'rodri',     name:'Rodri',        club:'Man City',         nation:'ESP', pos:'MF', lat:53.483 - 0.01,  lng:-2.200 + 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Rodri_2022_%28cropped%29.jpg/240px-Rodri_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'lamine',    name:'De Bruyne',    club:'Man City',         nation:'BEL', pos:'MF', lat:53.483 + 0.02,  lng:-2.200 - 0.02,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Kevin_De_Bruyne_2022_%28cropped%29.jpg/240px-Kevin_De_Bruyne_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'dembele',   name:'Dembélé',      club:'PSG',              nation:'FRA', pos:'FW', lat:48.924 + 0.01,  lng:2.332 - 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Ousmane_Demb%C3%A9l%C3%A9_2021_%28cropped%29.jpg/240px-Ousmane_Demb%C3%A9l%C3%A9_2021_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'vitinha',   name:'Vitinha',      club:'PSG',              nation:'POR', pos:'MF', lat:48.924 - 0.01,  lng:2.332 + 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Vitinha_2022_%28cropped%29.jpg/240px-Vitinha_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'gyokeres',  name:'Gyökeres',     club:'Sporting CP',      nation:'SWE', pos:'FW', lat:38.762 + 0.01,  lng:-9.157 - 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Viktor_Gyokeres_2023_%28cropped%29.jpg/240px-Viktor_Gyokeres_2023_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'diaz',      name:'L. Díaz',      club:'Liverpool',        nation:'COL', pos:'FW', lat:53.431 - 0.01,  lng:-2.961 - 0.01,  img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Luis_D%C3%ADaz_2022_%28cropped%29.jpg/240px-Luis_D%C3%ADaz_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'raphinha',  name:'Raphinha',     club:'Barcelona',        nation:'BRA', pos:'FW', lat:41.381 + 0.02,  lng:2.181 - 0.02,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Raphinha_2022_%28cropped%29.jpg/240px-Raphinha_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
+    { id:'vlahovic',  name:'Vlahović',     club:'Juventus',         nation:'SRB', pos:'FW', lat:45.110 + 0.01,  lng:7.623 - 0.01,   img:'https://wsrv.nl/?url=https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Du%C5%A1an_Vlahovi%C4%87_2022_%28cropped%29.jpg/240px-Du%C5%A1an_Vlahovi%C4%87_2022_%28cropped%29.jpg&w=80&h=80&fit=cover&a=top' },
   ];
 
-  // Pre-load images into off-screen Image objects
+  // Pre-load images — render each into an offscreen canvas (circular crop)
+  // so drawImage on the globe canvas never touches a tainted context.
   const playerImgs = {};
+  const playerCircles = {}; // id → offscreen canvas with circular crop
+
+  function makeCircleCanvas(img, size) {
+    const oc = document.createElement('canvas');
+    oc.width = oc.height = size;
+    const octx = oc.getContext('2d');
+    octx.beginPath();
+    octx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+    octx.clip();
+    octx.drawImage(img, 0, 0, size, size);
+    return oc;
+  }
+
   PLAYERS.forEach(p => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.referrerPolicy = 'no-referrer';
+    img.onload = () => {
+      try {
+        playerCircles[p.id] = makeCircleCanvas(img, 40);
+      } catch(e) {
+        // CORS tainted — fall back to initials on canvas
+        playerCircles[p.id] = null;
+      }
+    };
+    img.onerror = () => { playerCircles[p.id] = null; };
     img.src = p.img;
-    // On error, try a plain colored fallback (will render initials via code path)
-    img.onerror = () => { img._failed = true; };
     playerImgs[p.id] = img;
   });
 
@@ -4108,23 +4143,22 @@ window.FOOTINT_ARC_PATCH = {
       ctx.lineWidth = 0.8;
       ctx.stroke();
 
-      // Avatar circle clip
-      ctx.beginPath();
-      ctx.arc(sx, sy, r, 0, Math.PI * 2);
-      ctx.clip();
-
-      const img = playerImgs[p.id];
-      if(img && img.complete && img.naturalWidth > 0 && !img._failed){
-        ctx.drawImage(img, sx - r, sy - r, r * 2, r * 2);
+      // Avatar — use pre-rendered circle canvas (no CORS taint risk)
+      const circle = playerCircles[p.id];
+      if(circle) {
+        ctx.drawImage(circle, sx - r, sy - r, r * 2, r * 2);
       } else {
-        // Fallback: initials
-        ctx.fillStyle = focused ? 'rgba(10,40,24,0.96)' : 'rgba(3,20,14,0.96)';
+        // Fallback: dark bg + initials
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = focused ? 'rgba(10,40,24,0.96)' : 'rgba(3,20,14,0.94)';
         ctx.fill();
         ctx.fillStyle = focused ? '#39ff6a' : '#5af5ff';
-        ctx.font = `bold ${r * 0.72}px 'Share Tech Mono', monospace`;
+        ctx.font = `bold ${Math.round(r * 0.72)}px monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(p.name.slice(0,2).toUpperCase(), sx, sy);
+        const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        ctx.fillText(initials, sx, sy + 0.5);
       }
 
       // Border ring on top
@@ -4169,13 +4203,14 @@ window.FOOTINT_ARC_PATCH = {
       const row = document.createElement('div');
       row.className = 'pt-row';
       row.id = 'pt-row-' + p.id;
-      const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      const fallbackSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23051a0e'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-size='13' font-weight='bold' fill='%235af5ff'%3E${initials}%3C/text%3E%3C/svg%3E`;
+      const initials2 = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const svgFb = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23051a0e'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='12' font-weight='bold' fill='%235af5ff'%3E${initials2}%3C/text%3E%3C/svg%3E`;
       row.innerHTML = `
         <div class="pt-avatar-wrap">
           <img class="pt-avatar" src="${p.img}" alt="${p.name}"
-               onerror="this.src='${fallbackSvg}'"
-               referrerpolicy="no-referrer">
+               referrerpolicy="no-referrer"
+               onerror="this.src='${svgFb}'"
+               style="width:32px;height:32px;object-fit:cover;object-position:top center;">
           <div class="pt-avatar-pulse"></div>
         </div>
         <div class="pt-info">
@@ -4184,6 +4219,13 @@ window.FOOTINT_ARC_PATCH = {
         </div>
         <div class="pt-status-dot"></div>
       `;
+      // Set fallback after DOM insertion
+      const imgEl = row.querySelector('.pt-avatar');
+      if(imgEl) {
+        const ini = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        const fb = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23051a0e'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-size='12' font-weight='bold' fill='%235af5ff'%3E${ini}%3C/text%3E%3C/svg%3E`;
+        imgEl.onerror = () => { imgEl.src = fb; imgEl.onerror = null; };
+      }
       row.addEventListener('click', () => {
         focusedPlayerId = (focusedPlayerId === p.id) ? null : p.id;
         document.querySelectorAll('.pt-row').forEach(r => r.classList.remove('pt-focused'));
