@@ -1,0 +1,218 @@
+/* =========================
+   SPORTLINE GLOBAL STYLES
+   ========================= */
+
+:root {
+  --bg: #05070d;
+  --panel: rgba(12, 18, 30, 0.88);
+  --panel-hover: rgba(18, 26, 42, 0.95);
+
+  --primary: #00c3ff;
+  --primary-glow: rgba(0, 195, 255, 0.45);
+
+  --danger: #ff3b3b;
+  --success: #00ff99;
+  --warning: #ffb347;
+
+  --text: #e8edf7;
+  --text-muted: #8f9bb3;
+
+  --border: rgba(255, 255, 255, 0.08);
+
+  --radius: 14px;
+
+  --shadow:
+    0 0 20px rgba(0, 195, 255, 0.08),
+    0 0 50px rgba(0, 195, 255, 0.04);
+
+  --transition: 0.25s ease;
+}
+
+/* =========================
+   RESET
+   ========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family:
+    Inter,
+    Segoe UI,
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background: radial-gradient(
+      circle at center,
+      #091220 0%,
+      #05070d 60%
+    );
+
+  color: var(--text);
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1320;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 20px;
+}
+
+/* =========================
+   PANELS
+   ========================= */
+
+.panel {
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
+
+  transition: var(--transition);
+}
+
+.panel:hover {
+  background: var(--panel-hover);
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.btn {
+  border: none;
+  outline: none;
+
+  cursor: pointer;
+
+  padding: 10px 16px;
+
+  border-radius: 10px;
+
+  background: rgba(0, 195, 255, 0.12);
+
+  color: white;
+
+  transition: var(--transition);
+}
+
+.btn:hover {
+  background: rgba(0, 195, 255, 0.25);
+
+  box-shadow:
+    0 0 15px rgba(0, 195, 255, 0.35);
+}
+
+.btn.active {
+  background: var(--primary);
+
+  color: black;
+
+  font-weight: 700;
+}
+
+/* =========================
+   INPUTS
+   ========================= */
+
+input,
+select,
+textarea {
+  width: 100%;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border: 1px solid var(--border);
+
+  color: white;
+
+  border-radius: 10px;
+
+  padding: 10px 14px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 12px rgba(0, 195, 255, 0.3);
+}
+
+/* =========================
+   UTILITIES
+   ========================= */
+
+.hidden {
+  display: none !important;
+}
+
+.flex {
+  display: flex;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.glow-blue {
+  box-shadow:
+    0 0 20px rgba(0, 195, 255, 0.5);
+}
+
+.glow-red {
+  box-shadow:
+    0 0 20px rgba(255, 50, 50, 0.5);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
