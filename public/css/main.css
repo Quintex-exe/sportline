@@ -215,7 +215,8 @@ textarea:focus {
     opacity: 1;
     transform: translateY(0);
   }
-   
+} 
+
    .global-activity-grid{
     position:relative;
     width:100%;
@@ -223,13 +224,18 @@ textarea:focus {
    }
    
    .continent-marker{
-       position:absolute;
-       width:70px;
-       height:40px;
-       border:1px solid rgba(0,255,136,.15);
-       border-radius:50%;
-       filter:blur(2px);
-   }
+    position:absolute;
+
+    color:#00ff88;
+    font-size:11px;
+    font-weight:700;
+
+    text-shadow:0 0 8px #00ff88;
+
+    opacity:.85;
+
+    pointer-events:none;
+  }
    
    .na{ top:18%; left:12%; }
    .sa{ top:55%; left:22%; }
@@ -239,4 +245,5 @@ textarea:focus {
    
    .as{ top:22%; left:72%; }
    .oc{ top:68%; left:82%; }
-}
+  }
+ 
