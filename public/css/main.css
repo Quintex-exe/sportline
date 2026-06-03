@@ -215,4 +215,28 @@ textarea:focus {
     opacity: 1;
     transform: translateY(0);
   }
+   
+   .global-activity-grid{
+    position:relative;
+    width:100%;
+    height:100%;
+   }
+   
+   .continent-marker{
+       position:absolute;
+       width:70px;
+       height:40px;
+       border:1px solid rgba(0,255,136,.15);
+       border-radius:50%;
+       filter:blur(2px);
+   }
+   
+   .na{ top:18%; left:12%; }
+   .sa{ top:55%; left:22%; }
+   
+   .eu{ top:18%; left:48%; }
+   .af{ top:48%; left:58%; }
+   
+   .as{ top:22%; left:72%; }
+   .oc{ top:68%; left:82%; }
 }
