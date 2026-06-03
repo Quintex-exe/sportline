@@ -5,6 +5,9 @@ import threading
 import time
 import random
 
+from redditEngine import fetch_reddit
+from youtubeEngine import fetch_youtube
+
 app = Flask(__name__)
 
 socketio = SocketIO(
@@ -13,119 +16,290 @@ socketio = SocketIO(
 )
 
 feed_cache = []
+seen_ids = set()
 
 RSS_FEEDS = [
     "https://feeds.bbci.co.uk/sport/football/rss.xml",
     "https://www.espn.com/espn/rss/soccer/news",
-    "https://www.goal.com/feeds/en/news",
-]
-
-TYPES = [
-    "transfer",
-    "injury",
-    "signing",
-    "scout",
-    "match"
+    "https://www.goal.com/feeds/en/news"
 ]
 
 
 def classify(title):
 
-    t = title.lower()
+    title = title.lower()
 
-    if "injury" in t:
+    if "injury" in title:
         return "injury"
 
-    if "transfer" in t:
+    if "transfer" in title:
         return "transfer"
 
-    if "sign" in t:
+    if "sign" in title:
         return "signing"
 
-    if "scout" in t:
+    if "scout" in title:
         return "scout"
 
     return "match"
 
 
-def build_event(entry):
+def random_coordinates():
 
     return {
+        "lat": round(random.uniform(-60, 60), 4),
+        "lng": round(random.uniform(-180, 180), 4)
+    }
+
+
+def build_rss_event(entry, source_name):
+
+    coords = random_coordinates()
+
+    return {
+        "id": entry.link,
+
         "title": entry.title,
-        "url": entry.link,
-        "body": entry.title,
+
+        "body": getattr(
+            entry,
+            "summary",
+            entry.title
+        ),
+
         "type": classify(entry.title),
 
-        "lat": random.uniform(-60, 60),
-        "lng": random.uniform(-180, 180),
+        "source": source_name,
+
+        "provider": "rss",
+
+        "url": entry.link,
+
+        "lat": coords["lat"],
+
+        "lng": coords["lng"],
+
+        "timestamp": int(time.time()),
 
         "city": "LIVE",
+
         "club": "GLOBAL INTEL"
     }
 
 
-def rss_worker():
+def add_event(event):
+
+    event_id = event.get(
+        "id",
+        event.get("url")
+    )
+
+    if not event_id:
+        return
+
+    if event_id in seen_ids:
+        return
+
+    seen_ids.add(event_id)
+
+    feed_cache.append(event)
+
+    if len(feed_cache) > 500:
+        feed_cache.pop(0)
+
+    socketio.emit(
+        "intel-event",
+        event
+    )
+
+
+def rss_fetch():
+
+    for feed_url in RSS_FEEDS:
+
+        try:
+
+            feed = feedparser.parse(
+                feed_url
+            )
+
+            source_name = (
+                feed.feed.get(
+                    "title",
+                    "RSS Feed"
+                )
+            )
+
+            for entry in feed.entries[:10]:
+
+                event = build_rss_event(
+                    entry,
+                    source_name
+                )
+
+                add_event(event)
+
+        except Exception as e:
+
+            print(
+                f"RSS ERROR: {e}"
+            )
+
+
+def realtime_worker():
 
     while True:
 
         try:
 
-            for feed_url in RSS_FEEDS:
+            # RSS
+            rss_fetch()
 
-                feed = feedparser.parse(feed_url)
+            # REDDIT
+            try:
 
-                for entry in feed.entries[:3]:
+                reddit_events = (
+                    fetch_reddit()
+                )
 
-                    event = build_event(entry)
+                for event in reddit_events:
 
-                    feed_cache.append(event)
+                    if "lat" not in event:
 
-                    if len(feed_cache) > 100:
-                        feed_cache.pop(0)
+                        coords = (
+                            random_coordinates()
+                        )
 
-                    socketio.emit(
-                        "intel-event",
-                        event
-                    )
+                        event.update(coords)
+
+                    add_event(event)
+
+            except Exception as e:
+
+                print(
+                    f"REDDIT ERROR: {e}"
+                )
+
+            # YOUTUBE
+            try:
+
+                youtube_events = (
+                    fetch_youtube()
+                )
+
+                for event in youtube_events:
+
+                    if "lat" not in event:
+
+                        coords = (
+                            random_coordinates()
+                        )
+
+                        event.update(coords)
+
+                    add_event(event)
+
+            except Exception as e:
+
+                print(
+                    f"YOUTUBE ERROR: {e}"
+                )
+
+            # SOURCE STATUS
+            socketio.emit(
+                "source-update",
+                {
+                    "rss": True,
+                    "reddit": True,
+                    "youtube": True,
+                    "timestamp":
+                    int(time.time())
+                }
+            )
 
         except Exception as e:
-            print(e)
 
-        time.sleep(300)
+            print(
+                f"WORKER ERROR: {e}"
+            )
+
+        # refresh every 3 min
+        time.sleep(180)
 
 
 @app.route("/api/gist")
 def gist():
 
-    title = request.args.get("title", "")
+    title = request.args.get(
+        "title",
+        ""
+    )
 
-    response = {
+    return jsonify({
+
         "gist":
-        f"Football intelligence summary: {title}. "
-        f"Market activity detected and classified by Sportline."
-    }
+        (
+            f"Football intelligence summary: "
+            f"{title}. "
+            f"Live monitoring detected activity "
+            f"across RSS, Reddit and YouTube sources."
+        )
 
-    return jsonify(response)
+    })
+
+
+@app.route("/api/status")
+def status():
+
+    return jsonify({
+
+        "cached_events":
+        len(feed_cache),
+
+        "sources": [
+            "rss",
+            "reddit",
+            "youtube"
+        ],
+
+        "running": True
+    })
 
 
 @socketio.on("connect")
 def connect():
 
+    print(
+        "Client connected"
+    )
+
     socketio.emit(
         "initial-feed",
-        feed_cache[-40:]
+        feed_cache[-100:]
+    )
+
+    socketio.emit(
+        "source-update",
+        {
+            "rss": True,
+            "reddit": True,
+            "youtube": True,
+            "timestamp":
+            int(time.time())
+        }
     )
 
 
 if __name__ == "__main__":
 
     threading.Thread(
-        target=rss_worker,
+        target=realtime_worker,
         daemon=True
     ).start()
 
     socketio.run(
         app,
         host="0.0.0.0",
-        port=3000
+        port=3000,
+        debug=False
     )
