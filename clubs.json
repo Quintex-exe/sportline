@@ -1,428 +1,419 @@
 {
-  "arsenal":{
-    "city":"London",
-    "lat":51.5074,
-    "lng":-0.1278,
-    "region":"europe"
+  "arsenal": {
+    "city": "London",
+    "lat": 51.5549,
+    "lng": -0.1084,
+    "region": "europe",
+    "stadium": "Emirates Stadium"
   },
-
-  "chelsea":{
-    "city":"London",
-    "lat":51.5074,
-    "lng":-0.1278,
-    "region":"europe"
+  "chelsea": {
+    "city": "London",
+    "lat": 51.4816,
+    "lng": -0.1910,
+    "region": "europe",
+    "stadium": "Stamford Bridge"
   },
-
-  "liverpool":{
-    "city":"Liverpool",
-    "lat":53.4084,
-    "lng":-2.9916,
-    "region":"europe"
+  "liverpool": {
+    "city": "Liverpool",
+    "lat": 53.4308,
+    "lng": -2.9608,
+    "region": "europe",
+    "stadium": "Anfield"
   },
-
-  "manchester united":{
-    "city":"Manchester",
-    "lat":53.4808,
-    "lng":-2.2426,
-    "region":"europe"
+  "manchester united": {
+    "city": "Manchester",
+    "lat": 53.4631,
+    "lng": -2.2913,
+    "region": "europe",
+    "stadium": "Old Trafford"
   },
-
-  "manchester city":{
-    "city":"Manchester",
-    "lat":53.4808,
-    "lng":-2.2426,
-    "region":"europe"
+  "manchester city": {
+    "city": "Manchester",
+    "lat": 53.4831,
+    "lng": -2.2004,
+    "region": "europe",
+    "stadium": "Etihad Stadium"
   },
-
-  "tottenham":{
-    "city":"London",
-    "lat":51.5074,
-    "lng":-0.1278,
-    "region":"europe"
+  "tottenham": {
+    "city": "London",
+    "lat": 51.6033,
+    "lng": -0.0659,
+    "region": "europe",
+    "stadium": "Tottenham Hotspur Stadium"
   },
-
-  "real madrid":{
-    "city":"Madrid",
-    "lat":40.4168,
-    "lng":-3.7038,
-    "region":"europe"
+  "real madrid": {
+    "city": "Madrid",
+    "lat": 40.4530,
+    "lng": -3.6883,
+    "region": "europe",
+    "stadium": "Santiago Bernabeu"
   },
-
-  "barcelona":{
-    "city":"Barcelona",
-    "lat":41.3874,
-    "lng":2.1686,
-    "region":"europe"
+  "barcelona": {
+    "city": "Barcelona",
+    "lat": 41.3809,
+    "lng": 2.1228,
+    "region": "europe",
+    "stadium": "Estadi Olimpic Lluis Companys"
   },
-
-  "atletico madrid":{
-    "city":"Madrid",
-    "lat":40.4168,
-    "lng":-3.7038,
-    "region":"europe"
+  "atletico madrid": {
+    "city": "Madrid",
+    "lat": 40.4361,
+    "lng": -3.5995,
+    "region": "europe",
+    "stadium": "Civitas Metropolitano"
   },
-
-  "psg":{
-    "city":"Paris",
-    "lat":48.8566,
-    "lng":2.3522,
-    "region":"europe"
+  "psg": {
+    "city": "Paris",
+    "lat": 48.8414,
+    "lng": 2.2530,
+    "region": "europe",
+    "stadium": "Parc des Princes"
   },
-
-  "bayern":{
-    "city":"Munich",
-    "lat":48.1351,
-    "lng":11.5820,
-    "region":"europe"
+  "bayern": {
+    "city": "Munich",
+    "lat": 48.2188,
+    "lng": 11.6247,
+    "region": "europe",
+    "stadium": "Allianz Arena"
   },
-
-  "borussia dortmund":{
-    "city":"Dortmund",
-    "lat":51.5136,
-    "lng":7.4653,
-    "region":"europe"
+  "borussia dortmund": {
+    "city": "Dortmund",
+    "lat": 51.4926,
+    "lng": 7.4518,
+    "region": "europe",
+    "stadium": "Signal Iduna Park"
   },
-
-  "juventus":{
-    "city":"Turin",
-    "lat":45.0703,
-    "lng":7.6869,
-    "region":"europe"
+  "juventus": {
+    "city": "Turin",
+    "lat": 45.1096,
+    "lng": 7.6412,
+    "region": "europe",
+    "stadium": "Juventus Stadium"
   },
-
-  "inter milan":{
-    "city":"Milan",
-    "lat":45.4642,
-    "lng":9.1900,
-    "region":"europe"
+  "inter milan": {
+    "city": "Milan",
+    "lat": 45.4781,
+    "lng": 9.1240,
+    "region": "europe",
+    "stadium": "San Siro"
   },
-
-  "ac milan":{
-    "city":"Milan",
-    "lat":45.4642,
-    "lng":9.1900,
-    "region":"europe"
+  "ac milan": {
+    "city": "Milan",
+    "lat": 45.4781,
+    "lng": 9.1240,
+    "region": "europe",
+    "stadium": "San Siro"
   },
-
-  "flamengo":{
-    "city":"Rio de Janeiro",
-    "lat":-22.9068,
-    "lng":-43.1729,
-    "region":"southamerica"
+  "flamengo": {
+    "city": "Rio de Janeiro",
+    "lat": -22.9120,
+    "lng": -43.2301,
+    "region": "southamerica",
+    "stadium": "Maracana"
   },
-
-  "palmeiras":{
-    "city":"Sao Paulo",
-    "lat":-23.5505,
-    "lng":-46.6333,
-    "region":"southamerica"
+  "palmeiras": {
+    "city": "Sao Paulo",
+    "lat": -23.5267,
+    "lng": -46.7195,
+    "region": "southamerica",
+    "stadium": "Allianz Parque"
   },
-
-  "boca":{
-    "city":"Buenos Aires",
-    "lat":-34.6037,
-    "lng":-58.3816,
-    "region":"southamerica"
+  "boca": {
+    "city": "Buenos Aires",
+    "lat": -34.6353,
+    "lng": -58.3653,
+    "region": "southamerica",
+    "stadium": "La Bombonera"
   },
-
-  "river plate":{
-    "city":"Buenos Aires",
-    "lat":-34.6037,
-    "lng":-58.3816,
-    "region":"southamerica"
+  "river plate": {
+    "city": "Buenos Aires",
+    "lat": -34.5455,
+    "lng": -58.4498,
+    "region": "southamerica",
+    "stadium": "El Monumental"
   },
-
-  "inter miami":{
-    "city":"Miami",
-    "lat":25.7617,
-    "lng":-80.1918,
-    "region":"northamerica"
+  "inter miami": {
+    "city": "Miami",
+    "lat": 25.7582,
+    "lng": -80.2388,
+    "region": "northamerica",
+    "stadium": "Chase Stadium"
   },
-
-  "lafc":{
-    "city":"Los Angeles",
-    "lat":34.0522,
-    "lng":-118.2437,
-    "region":"northamerica"
+  "lafc": {
+    "city": "Los Angeles",
+    "lat": 34.0136,
+    "lng": -118.2851,
+    "region": "northamerica",
+    "stadium": "BMO Stadium"
   },
-
-  "al nassr":{
-    "city":"Riyadh",
-    "lat":24.7136,
-    "lng":46.6753,
-    "region":"asia"
+  "al nassr": {
+    "city": "Riyadh",
+    "lat": 24.7136,
+    "lng": 46.6753,
+    "region": "asia",
+    "stadium": "Al-Awwal Park"
   },
-
-  "al hilal":{
-    "city":"Riyadh",
-    "lat":24.7136,
-    "lng":46.6753,
-    "region":"asia"
+  "al hilal": {
+    "city": "Riyadh",
+    "lat": 24.7592,
+    "lng": 46.6862,
+    "region": "asia",
+    "stadium": "Kingdom Arena"
   },
-
-  "al ahly":{
-    "city":"Cairo",
-    "lat":30.0444,
-    "lng":31.2357,
-    "region":"africa"
+  "al ahly": {
+    "city": "Cairo",
+    "lat": 30.0626,
+    "lng": 31.2217,
+    "region": "africa",
+    "stadium": "Al Ahly Stadium"
   },
-
-  "man utd":{
-    "city":"Manchester",
-    "lat":53.4808,
-    "lng":-2.2426,
-    "region":"europe"
+  "man utd": {
+    "city": "Manchester",
+    "lat": 53.4631,
+    "lng": -2.2913,
+    "region": "europe",
+    "stadium": "Old Trafford"
   },
-
-  "man united":{
-    "city":"Manchester",
-    "lat":53.4808,
-    "lng":-2.2426,
-    "region":"europe"
+  "man united": {
+    "city": "Manchester",
+    "lat": 53.4631,
+    "lng": -2.2913,
+    "region": "europe",
+    "stadium": "Old Trafford"
   },
-
-  "man city":{
-    "city":"Manchester",
-    "lat":53.4808,
-    "lng":-2.2426,
-    "region":"europe"
+  "man city": {
+    "city": "Manchester",
+    "lat": 53.4831,
+    "lng": -2.2004,
+    "region": "europe",
+    "stadium": "Etihad Stadium"
   },
-
-  "ajax":{
-    "city":"Amsterdam",
-    "lat":52.3676,
-    "lng":4.9041,
-    "region":"europe"
+  "ajax": {
+    "city": "Amsterdam",
+    "lat": 52.3143,
+    "lng": 4.9419,
+    "region": "europe",
+    "stadium": "Johan Cruyff Arena"
   },
-
-  "benfica":{
-    "city":"Lisbon",
-    "lat":38.7223,
-    "lng":-9.1393,
-    "region":"europe"
+  "benfica": {
+    "city": "Lisbon",
+    "lat": 38.7522,
+    "lng": -9.1845,
+    "region": "europe",
+    "stadium": "Estadio da Luz"
   },
-
-  "sporting":{
-    "city":"Lisbon",
-    "lat":38.7223,
-    "lng":-9.1393,
-    "region":"europe"
+  "sporting": {
+    "city": "Lisbon",
+    "lat": 38.7613,
+    "lng": -9.1606,
+    "region": "europe",
+    "stadium": "Estadio Jose Alvalade"
   },
-
-  "porto":{
-    "city":"Porto",
-    "lat":41.1579,
-    "lng":-8.6291,
-    "region":"europe"
+  "porto": {
+    "city": "Porto",
+    "lat": 41.1619,
+    "lng": -8.5831,
+    "region": "europe",
+    "stadium": "Estadio do Dragao"
   },
-
-  "napoli":{
-    "city":"Naples",
-    "lat":40.8518,
-    "lng":14.2681,
-    "region":"europe"
+  "napoli": {
+    "city": "Naples",
+    "lat": 40.8279,
+    "lng": 14.1933,
+    "region": "europe",
+    "stadium": "Diego Armando Maradona"
   },
-
-  "roma":{
-    "city":"Rome",
-    "lat":41.9028,
-    "lng":12.4964,
-    "region":"europe"
+  "roma": {
+    "city": "Rome",
+    "lat": 41.9340,
+    "lng": 12.4547,
+    "region": "europe",
+    "stadium": "Stadio Olimpico"
   },
-
-  "lazio":{
-    "city":"Rome",
-    "lat":41.9028,
-    "lng":12.4964,
-    "region":"europe"
+  "lazio": {
+    "city": "Rome",
+    "lat": 41.9340,
+    "lng": 12.4547,
+    "region": "europe",
+    "stadium": "Stadio Olimpico"
   },
-
-  "sevilla":{
-    "city":"Seville",
-    "lat":37.3891,
-    "lng":-5.9845,
-    "region":"europe"
+  "sevilla": {
+    "city": "Seville",
+    "lat": 37.3840,
+    "lng": -5.9705,
+    "region": "europe",
+    "stadium": "Ramon Sanchez-Pizjuan"
   },
-
-  "valencia":{
-    "city":"Valencia",
-    "lat":39.4699,
-    "lng":-0.3763,
-    "region":"europe"
+  "valencia": {
+    "city": "Valencia",
+    "lat": 39.4749,
+    "lng": -0.3585,
+    "region": "europe",
+    "stadium": "Mestalla"
   },
-
-  "marseille":{
-    "city":"Marseille",
-    "lat":43.2965,
-    "lng":5.3698,
-    "region":"europe"
+  "marseille": {
+    "city": "Marseille",
+    "lat": 43.2697,
+    "lng": 5.3962,
+    "region": "europe",
+    "stadium": "Orange Velodrome"
   },
-
-  "lyon":{
-    "city":"Lyon",
-    "lat":45.7640,
-    "lng":4.8357,
-    "region":"europe"
+  "lyon": {
+    "city": "Lyon",
+    "lat": 45.7653,
+    "lng": 4.9822,
+    "region": "europe",
+    "stadium": "Groupama Stadium"
   },
-
-  "monaco":{
-    "city":"Monaco",
-    "lat":43.7384,
-    "lng":7.4246,
-    "region":"europe"
+  "monaco": {
+    "city": "Monaco",
+    "lat": 43.7272,
+    "lng": 7.4157,
+    "region": "europe",
+    "stadium": "Stade Louis II"
   },
-
-  "rb leipzig":{
-    "city":"Leipzig",
-    "lat":51.3397,
-    "lng":12.3731,
-    "region":"europe"
+  "rb leipzig": {
+    "city": "Leipzig",
+    "lat": 51.3458,
+    "lng": 12.3481,
+    "region": "europe",
+    "stadium": "Red Bull Arena"
   },
-
-  "leverkusen":{
-    "city":"Leverkusen",
-    "lat":51.0459,
-    "lng":7.0192,
-    "region":"europe"
+  "leverkusen": {
+    "city": "Leverkusen",
+    "lat": 51.0382,
+    "lng": 7.0023,
+    "region": "europe",
+    "stadium": "BayArena"
   },
-
-  "galatasaray":{
-    "city":"Istanbul",
-    "lat":41.0082,
-    "lng":28.9784,
-    "region":"europe"
+  "galatasaray": {
+    "city": "Istanbul",
+    "lat": 41.0767,
+    "lng": 29.0233,
+    "region": "europe",
+    "stadium": "Rams Park"
   },
-
-  "fenerbahce":{
-    "city":"Istanbul",
-    "lat":41.0082,
-    "lng":28.9784,
-    "region":"europe"
+  "fenerbahce": {
+    "city": "Istanbul",
+    "lat": 40.9782,
+    "lng": 29.0347,
+    "region": "europe",
+    "stadium": "Sukru Saracoglu"
   },
-
-  "celtic":{
-    "city":"Glasgow",
-    "lat":55.8642,
-    "lng":-4.2518,
-    "region":"europe"
+  "celtic": {
+    "city": "Glasgow",
+    "lat": 55.8497,
+    "lng": -4.2057,
+    "region": "europe",
+    "stadium": "Celtic Park"
   },
-
-  "rangers":{
-    "city":"Glasgow",
-    "lat":55.8642,
-    "lng":-4.2518,
-    "region":"europe"
+  "rangers": {
+    "city": "Glasgow",
+    "lat": 55.8510,
+    "lng": -4.3091,
+    "region": "europe",
+    "stadium": "Ibrox Stadium"
   },
-
-  "club america":{
-    "city":"Mexico City",
-    "lat":19.4326,
-    "lng":-99.1332,
-    "region":"northamerica"
+  "club america": {
+    "city": "Mexico City",
+    "lat": 19.3030,
+    "lng": -99.1502,
+    "region": "northamerica",
+    "stadium": "Estadio Azteca"
   },
-
-  "tigres":{
-    "city":"Monterrey",
-    "lat":25.6866,
-    "lng":-100.3161,
-    "region":"northamerica"
+  "tigres": {
+    "city": "Monterrey",
+    "lat": 25.6694,
+    "lng": -100.2462,
+    "region": "northamerica",
+    "stadium": "Estadio Universitario"
   },
-
-  "monterrey":{
-    "city":"Monterrey",
-    "lat":25.6866,
-    "lng":-100.3161,
-    "region":"northamerica"
+  "monterrey": {
+    "city": "Monterrey",
+    "lat": 25.6693,
+    "lng": -100.3126,
+    "region": "northamerica",
+    "stadium": "Estadio BBVA"
   },
-
-  "al ittihad":{
-    "city":"Jeddah",
-    "lat":21.4858,
-    "lng":39.1925,
-    "region":"asia"
+  "al ittihad": {
+    "city": "Jeddah",
+    "lat": 21.5257,
+    "lng": 39.1711,
+    "region": "asia",
+    "stadium": "King Abdullah Sports City"
   },
-
-  "urawa reds":{
-    "city":"Saitama",
-    "lat":35.8617,
-    "lng":139.6455,
-    "region":"asia"
+  "urawa reds": {
+    "city": "Saitama",
+    "lat": 35.8951,
+    "lng": 139.6537,
+    "region": "asia",
+    "stadium": "Saitama Stadium"
   },
-
-  "kawasaki frontale":{
-    "city":"Kawasaki",
-    "lat":35.5308,
-    "lng":139.7036,
-    "region":"asia"
+  "kawasaki frontale": {
+    "city": "Kawasaki",
+    "lat": 35.5729,
+    "lng": 139.6590,
+    "region": "asia",
+    "stadium": "Todoroki Athletics Stadium"
   },
-
-  "champions league":{
-    "city":"Nyon",
-    "lat":46.3833,
-    "lng":6.2333,
-    "region":"europe"
+  "champions league": {
+    "city": "Nyon",
+    "lat": 46.3833,
+    "lng": 6.2333,
+    "region": "europe"
   },
-
-  "premier league":{
-    "city":"London",
-    "lat":51.5074,
-    "lng":-0.1278,
-    "region":"europe"
+  "premier league": {
+    "city": "London",
+    "lat": 51.5074,
+    "lng": -0.1278,
+    "region": "europe"
   },
-
-  "la liga":{
-    "city":"Madrid",
-    "lat":40.4168,
-    "lng":-3.7038,
-    "region":"europe"
+  "la liga": {
+    "city": "Madrid",
+    "lat": 40.4168,
+    "lng": -3.7038,
+    "region": "europe"
   },
-
-  "bundesliga":{
-    "city":"Frankfurt",
-    "lat":50.1109,
-    "lng":8.6821,
-    "region":"europe"
+  "bundesliga": {
+    "city": "Frankfurt",
+    "lat": 50.1109,
+    "lng": 8.6821,
+    "region": "europe"
   },
-
-  "serie a":{
-    "city":"Milan",
-    "lat":45.4642,
-    "lng":9.1900,
-    "region":"europe"
+  "serie a": {
+    "city": "Milan",
+    "lat": 45.4642,
+    "lng": 9.1900,
+    "region": "europe"
   },
-
-  "ligue 1":{
-    "city":"Paris",
-    "lat":48.8566,
-    "lng":2.3522,
-    "region":"europe"
+  "ligue 1": {
+    "city": "Paris",
+    "lat": 48.8566,
+    "lng": 2.3522,
+    "region": "europe"
   },
-
-  "mls":{
-    "city":"New York",
-    "lat":40.7128,
-    "lng":-74.0060,
-    "region":"northamerica"
+  "mls": {
+    "city": "New York",
+    "lat": 40.7128,
+    "lng": -74.0060,
+    "region": "northamerica"
   },
-
-  "libertadores":{
-    "city":"Buenos Aires",
-    "lat":-34.6037,
-    "lng":-58.3816,
-    "region":"southamerica"
+  "libertadores": {
+    "city": "Buenos Aires",
+    "lat": -34.6037,
+    "lng": -58.3816,
+    "region": "southamerica"
   },
-
-  "afc champions league":{
-    "city":"Kuala Lumpur",
-    "lat":3.1390,
-    "lng":101.6869,
-    "region":"asia"
+  "afc champions league": {
+    "city": "Kuala Lumpur",
+    "lat": 3.1390,
+    "lng": 101.6869,
+    "region": "asia"
   },
-
-  "caf champions league":{
-    "city":"Cairo",
-    "lat":30.0444,
-    "lng":31.2357,
-    "region":"africa"
+  "caf champions league": {
+    "city": "Cairo",
+    "lat": 30.0444,
+    "lng": 31.2357,
+    "region": "africa"
   }
 }
