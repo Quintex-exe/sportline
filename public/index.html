@@ -1929,6 +1929,50 @@ const nodeExpiry = {};
 let totalEvents = 0;
 let feedCount = 0;
 
+// ── Session-based signal counters (replaces Math.random fakes) ────────────────
+const sessionCounts = { live: 0, transfer: 0, scout: 0, match: 0, injury: 0, signing: 0 };
+let   lastEventTimestamps = []; // rolling window for flow-rate calc
+
+function recordSessionEvent(type) {
+  const t = (type || 'live').toLowerCase();
+  if (t in sessionCounts) sessionCounts[t]++;
+  else                     sessionCounts.live++;
+  lastEventTimestamps.push(Date.now());
+  // keep only last 60 seconds
+  const cutoff = Date.now() - 60000;
+  lastEventTimestamps = lastEventTimestamps.filter(ts => ts > cutoff);
+  refreshSignalPanel();
+}
+
+function refreshSignalPanel() {
+  const total = Object.values(sessionCounts).reduce((a, b) => a + b, 0) || 1;
+
+  const liveEl      = document.getElementById('sig-live');
+  const transferEl  = document.getElementById('sig-transfer');
+  const scoutEl     = document.getElementById('sig-scout');
+  const heatEl      = document.getElementById('sig-heat');
+  const matchesEl   = document.getElementById('ops-matches');
+  const transfersEl = document.getElementById('ops-transfers');
+
+  if (liveEl)      liveEl.textContent      = sessionCounts.live + sessionCounts.match + sessionCounts.injury + sessionCounts.signing;
+  if (transferEl)  transferEl.textContent  = sessionCounts.transfer;
+  if (scoutEl)     scoutEl.textContent     = sessionCounts.scout;
+  if (heatEl)      heatEl.textContent      = Math.round((sessionCounts.transfer / total) * 100) + '%';
+  if (matchesEl)   matchesEl.textContent   = sessionCounts.match + sessionCounts.live;
+  if (transfersEl) transfersEl.textContent = sessionCounts.transfer;
+
+  // event-flow label based on events/min rate
+  const rate = lastEventTimestamps.length; // events in last 60s
+  const flowEl = document.getElementById('eventFlow');
+  if (flowEl) {
+    flowEl.textContent = rate === 0 ? 'IDLE'
+                       : rate < 3   ? 'LOW'
+                       : rate < 8   ? 'MED'
+                       : rate < 15  ? 'HIGH'
+                       :              'SURGE';
+  }
+}
+
 // ── Math helpers ─────────────────────────────────────────────────────────────
 
 function latLngTo3D(lat, lng) {
@@ -2287,24 +2331,17 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
   });
 });
 
-// Dynamic signal panel
-setInterval(() => {
-  document.getElementById('sig-live').textContent = 20 + Math.floor(Math.random()*15);
-  document.getElementById('sig-transfer').textContent = 120 + Math.floor(Math.random()*60);
-  document.getElementById('sig-scout').textContent = 20 + Math.floor(Math.random()*25);
-  document.getElementById('sig-heat').textContent = 70 + Math.floor(Math.random()*30) + '%';
-}, 3000);
+// Dynamic signal panel — driven by real session counts (refreshSignalPanel)
+// Initial render with zeros until first events arrive
+refreshSignalPanel();
 
 
 
-// PART 3 live tactical stats
+// PART 3 live tactical stats — latency is network-sim, flow derived from real event rate
 setInterval(() => {
   document.getElementById('latencyStat').textContent =
     (28 + Math.floor(Math.random()*35)) + 'ms';
-
-  const flowStates = ['LOW','MED','HIGH','SURGE'];
-  document.getElementById('eventFlow').textContent =
-    flowStates[Math.floor(Math.random()*flowStates.length)];
+  // eventFlow is now updated by refreshSignalPanel() on each real event
 }, 2400);
 
 
@@ -2459,6 +2496,7 @@ function injectRealEvent({
 
   totalEvents++;
   feedCount++;
+  recordSessionEvent(type);
 
   document.getElementById('event-count')
     .textContent =
@@ -2518,14 +2556,7 @@ function injectRealEvent({
 
 
 
-// Tactical counters
-setInterval(() => {
-  const matches = document.getElementById('ops-matches');
-  const transfers = document.getElementById('ops-transfers');
-
-  matches.textContent = 20 + Math.floor(Math.random() * 18);
-  transfers.textContent = 120 + Math.floor(Math.random() * 60);
-}, 4000);
+// ops-matches and ops-transfers are now updated by refreshSignalPanel() on each real event
 
 
 
@@ -3006,6 +3037,7 @@ function renderCachedFeed(event){
 
   totalEvents++;
   feedCount++;
+  recordSessionEvent(event && event.type);
 
   document.getElementById('event-count')
     .textContent = `${totalEvents} events tracked`;
