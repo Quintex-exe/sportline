@@ -1391,8 +1391,8 @@ This file is prepared to consume exact lat/lng data emitted by the backend.
     <div class="tb-left">
       <div class="logo">FOOT<span>INT</span></div>
       <div class="status-pill">
-        <div class="status-dot"></div>
-        <span class="live-text">LIVE</span>
+        <div class="status-dot" id="rss-status-dot"></div>
+        <span class="live-text" id="rss-status-text">CONNECTING</span>
       </div>
       <span id="event-count">0 events tracked</span>
     </div>
@@ -2448,6 +2448,9 @@ updateClock();
 
 async function fetchRealNews(){
 
+  const dot  = document.getElementById('rss-status-dot');
+  const text = document.getElementById('rss-status-text');
+
   try{
 
     const res = await fetch(
@@ -2456,7 +2459,16 @@ async function fetchRealNews(){
 
     const data = await res.json();
 
-    if(!data.items) return;
+    if(!data.items){
+      if(dot)  dot.style.cssText  = 'background:#f9c74f;box-shadow:0 0 6px #f9c74f';
+      if(text) text.textContent   = 'NO FEED';
+      return;
+    }
+
+    // ── success ──────────────────────────────────────────────────────────────
+    if(dot)  dot.style.cssText  = '';          // revert to default CSS (green pulse)
+    const hhmm = new Date().toUTCString().slice(17,22);
+    if(text) text.textContent   = `LIVE · ${hhmm}`;
 
     data.items.slice(0,8).forEach(article => {
 
@@ -2486,7 +2498,11 @@ async function fetchRealNews(){
     });
 
   }catch(err){
-    // RSS fetch unavailable in this environment — simulated feed active
+    // RSS fetch unavailable — simulated feed active
+    const dot  = document.getElementById('rss-status-dot');
+    const text = document.getElementById('rss-status-text');
+    if(dot)  dot.style.cssText = 'background:#ff6b6b;box-shadow:0 0 6px #ff6b6b';
+    if(text) text.textContent  = 'OFFLINE · SIM';
   }
 }
 
