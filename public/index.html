@@ -3707,6 +3707,9 @@ window.FOOTINT_ARC_PATCH = {
     <div class="idp-section-label">SIGNAL ANALYTICS</div>
     <div id="idp-analytics"></div>
 
+    <div class="idp-section-label" id="idp-value-label" style="display:none">MARKET VALUE</div>
+    <div id="idp-value"></div>
+
     <div id="idp-link-row">
       <a id="idp-source-link" href="#" target="_blank">⬡ OPEN SOURCE →</a>
     </div>
@@ -3744,30 +3747,37 @@ window.FOOTINT_ARC_PATCH = {
 
 <script>
 (function(){
+  // ── Player list with Transfermarkt IDs for live value fetching ───────────────
   const PLAYERS = [
-    { name:'Mbappé',      club:'Real Madrid', pos:'FW', val:180, chg:+2.1 },
-    { name:'Vinicius Jr', club:'Real Madrid', pos:'FW', val:160, chg:+1.4 },
-    { name:'Bellingham',  club:'Real Madrid', pos:'MF', val:180, chg:+0.8 },
-    { name:'Haaland',     club:'Man City',    pos:'FW', val:170, chg:-0.5 },
-    { name:'Pedri',       club:'Barcelona',   pos:'MF', val:130, chg:+1.1 },
-    { name:'Saka',        club:'Arsenal',     pos:'FW', val:140, chg:+0.3 },
-    { name:'Salah',       club:'Liverpool',   pos:'FW', val: 80, chg:-1.2 },
-    { name:'De Bruyne',   club:'Man City',    pos:'MF', val: 55, chg:-0.9 },
-    { name:'Yamal',       club:'Barcelona',   pos:'FW', val:120, chg:+3.4 },
-    { name:'Wirtz',       club:'B. Leverkusen',pos:'MF',val:130, chg:+2.0 },
+    { name:'Mbappé',      club:'Real Madrid',   pos:'FW', tmId:'342229',  val:null, chg:null },
+    { name:'Vinicius Jr', club:'Real Madrid',   pos:'FW', tmId:'371998',  val:null, chg:null },
+    { name:'Bellingham',  club:'Real Madrid',   pos:'MF', tmId:'581678',  val:null, chg:null },
+    { name:'Haaland',     club:'Man City',      pos:'FW', tmId:'418560',  val:null, chg:null },
+    { name:'Pedri',       club:'Barcelona',     pos:'MF', tmId:'722836',  val:null, chg:null },
+    { name:'Saka',        club:'Arsenal',       pos:'FW', tmId:'779501',  val:null, chg:null },
+    { name:'Salah',       club:'Liverpool',     pos:'FW', tmId:'148455',  val:null, chg:null },
+    { name:'De Bruyne',   club:'Man City',      pos:'MF', tmId:'88755',   val:null, chg:null },
+    { name:'Yamal',       club:'Barcelona',     pos:'FW', tmId:'987938',  val:null, chg:null },
+    { name:'Wirtz',       club:'B. Leverkusen', pos:'MF', tmId:'921361',  val:null, chg:null },
   ];
 
-  function fmtVal(v){ return v >= 100 ? `€${v}M` : `€${v}M`; }
+  function fmtVal(v){
+    if(v === null) return '…';
+    if(v >= 1e8)  return '€' + (v/1e6).toFixed(0) + 'M';
+    if(v >= 1e6)  return '€' + (v/1e6).toFixed(1) + 'M';
+    return '€' + (v/1e3).toFixed(0) + 'K';
+  }
 
-  function renderRows(){
+  function renderRows(loading = false){
     const body = document.getElementById('pm-body');
     body.innerHTML = '';
     PLAYERS.forEach(p => {
-      const up   = p.chg > 0.05;
-      const down = p.chg < -0.05;
+      const up   = p.chg !== null && p.chg > 0.05;
+      const down = p.chg !== null && p.chg < -0.05;
       const dir  = up ? 'up' : down ? 'down' : 'flat';
       const arrow= up ? '▲' : down ? '▼' : '●';
       const sign = up ? '+' : '';
+      const chgTxt = p.chg !== null ? `${sign}${p.chg.toFixed(1)}%` : (loading ? '…' : '—');
       const row  = document.createElement('div');
       row.className = 'pm-row';
       row.innerHTML = `
@@ -3778,29 +3788,72 @@ window.FOOTINT_ARC_PATCH = {
           </div>
           <span class="pm-meta">${p.club} · ${p.pos}</span>
         </div>
-        <div class="pm-val">${fmtVal(p.val)}</div>
-        <div class="pm-chg ${dir}">${sign}${p.chg.toFixed(1)}%</div>
+        <div class="pm-val" id="pm-val-${p.tmId}">${fmtVal(p.val)}</div>
+        <div class="pm-chg ${dir}" id="pm-chg-${p.tmId}">${chgTxt}</div>
       `;
       body.appendChild(row);
     });
   }
 
+  // ── Fetch live market values from Transfermarkt API ────────────────────────
+  async function fetchLiveValues(){
+    document.getElementById('pm-updated').textContent = 'FETCHING…';
+    renderRows(true);
+
+    const TM_BASE = 'https://transfermarkt-api.vercel.app';
+
+    await Promise.allSettled(PLAYERS.map(async p => {
+      try {
+        // Current market value from profile
+        const profRes = await fetch(`${TM_BASE}/players/${p.tmId}/profile`);
+        if(!profRes.ok) return;
+        const prof = await profRes.json();
+        const mv = prof.marketValue || null;
+        if(mv) p.val = mv;
+
+        // Trend: last two history points
+        const histRes = await fetch(`${TM_BASE}/players/${p.tmId}/market_value`);
+        if(histRes.ok){
+          const hd  = await histRes.json();
+          const pts = (hd.marketValueHistory || hd.history || []).filter(x => x.value);
+          if(pts.length >= 2){
+            const prev = pts[pts.length - 2].value;
+            const curr = pts[pts.length - 1].value;
+            p.chg = prev ? parseFloat(((curr - prev) / prev * 100).toFixed(1)) : null;
+            if(mv === null && curr) p.val = curr;
+          }
+        }
+
+        // Live update individual cells without full re-render
+        const valEl = document.getElementById('pm-val-' + p.tmId);
+        const chgEl = document.getElementById('pm-chg-' + p.tmId);
+        if(valEl) valEl.textContent = fmtVal(p.val);
+        if(chgEl && p.chg !== null){
+          const up = p.chg > 0.05, dn = p.chg < -0.05;
+          chgEl.className = 'pm-chg ' + (up ? 'up' : dn ? 'down' : 'flat');
+          chgEl.textContent = (up ? '+' : '') + p.chg.toFixed(1) + '%';
+        }
+      } catch(_){}
+    }));
+
+    const now = new Date();
+    document.getElementById('pm-updated').textContent =
+      'LIVE · ' + now.toUTCString().slice(17, 22) + ' UTC';
+  }
+
+  // Initial load on panel open
+  fetchLiveValues();
+
   renderRows();
 
-  // Refresh
+  // Refresh — hits real Transfermarkt API
   const refreshBtn = document.getElementById('pm-refresh-btn');
   refreshBtn.addEventListener('click', e => {
     e.stopPropagation();
     refreshBtn.classList.add('pm-spinning');
-    setTimeout(() => refreshBtn.classList.remove('pm-spinning'), 600);
-    PLAYERS.forEach(p => {
-      const d = (Math.random() - 0.48) * 0.6;
-      p.chg = parseFloat((p.chg + d).toFixed(1));
-      p.val = parseFloat(Math.max(1, p.val * (1 + d * 0.002)).toFixed(1));
+    fetchLiveValues().finally(() => {
+      setTimeout(() => refreshBtn.classList.remove('pm-spinning'), 400);
     });
-    renderRows();
-    document.getElementById('pm-updated').textContent = 'UPDATED';
-    setTimeout(() => document.getElementById('pm-updated').textContent = 'LIVE VALUES', 2000);
   });
 
   // Collapse
@@ -4036,7 +4089,114 @@ window.FOOTINT_ARC_PATCH = {
 
     // Gist — server extracts from article (free, no API)
     fetchGist(url, title, type);
+
+    // Player market value — only for transfer/signing events
+    const valueEl      = document.getElementById('idp-value');
+    const valueLabelEl = document.getElementById('idp-value-label');
+    if(valueEl) valueEl.innerHTML = '';
+    if(valueLabelEl) valueLabelEl.style.display = 'none';
+    if(type === 'transfer' || type === 'signing'){
+      fetchPlayerValue(title, valueEl, valueLabelEl);
+    }
   };
+
+  // ── Extract most likely player name from headline ──────────────────────────
+  function extractPlayerName(headline){
+    let h = headline.replace(/^(breaking|exclusive|fabrizio romano|david ornstein|reports?|transfer news)[:\s\u2013-]*/i, '').trim();
+    const m = h.match(/^([A-Z\u00C0-\u00D6][a-z\u00E0-\u00F6]+(?:[\u2010- ][A-Z\u00C0-\u00D6][a-z\u00E0-\u00F6]+){0,3})/);
+    return m ? m[1].trim() : null;
+  }
+
+  // ── Fetch real player market value from Transfermarkt API ─────────────────
+  // transfermarkt-api.vercel.app — free, no key, CORS-open
+  async function fetchPlayerValue(headline, valueEl, valueLabelEl){
+    const playerName = extractPlayerName(headline);
+    if(!playerName || !valueEl) return;
+
+    valueLabelEl.style.display = '';
+    valueEl.innerHTML = '<div style="padding:8px 14px;font-size:9px;color:#557566;font-family:\'Share Tech Mono\',monospace"><span style="opacity:.6">QUERYING TRANSFERMARKT…</span></div>';
+
+    try {
+      const query = encodeURIComponent(playerName);
+      const res   = await fetch('https://transfermarkt-api.vercel.app/players/search/' + query + '?page_number=1');
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const data  = await res.json();
+      const results = data.results || [];
+      if(results.length === 0) throw new Error('no results');
+
+      const lower  = playerName.toLowerCase();
+      const player = results.find(p => p.name && p.name.toLowerCase().includes(lower)) || results[0];
+
+      let profile = null;
+      if(player.id){
+        try{
+          const pr = await fetch('https://transfermarkt-api.vercel.app/players/' + player.id + '/profile');
+          if(pr.ok) profile = await pr.json();
+        }catch(_){}
+      }
+
+      const p = profile || player;
+      const mv = p.marketValue || player.marketValue || null;
+      const mvFmt = mv
+        ? (mv >= 1e6 ? (mv/1e6).toFixed(1) + 'M \u20AC' : (mv/1e3).toFixed(0) + 'K \u20AC')
+        : '\u2014';
+
+      let trendHTML = '';
+      if(player.id){
+        try{
+          const hr = await fetch('https://transfermarkt-api.vercel.app/players/' + player.id + '/market_value');
+          if(hr.ok){
+            const hd  = await hr.json();
+            const pts = (hd.marketValueHistory || hd.history || []).slice(-2);
+            if(pts.length === 2){
+              const delta = (pts[1].value||0) - (pts[0].value||0);
+              const pct   = pts[0].value ? ((delta/pts[0].value)*100).toFixed(1) : null;
+              const col   = delta>0?'#39ff6a':delta<0?'#ff6b6b':'#f9c74f';
+              const arr   = delta>0?'\u2191':delta<0?'\u2193':'\u2192';
+              if(pct) trendHTML = '<span style="color:'+col+';margin-left:6px">'+arr+' '+Math.abs(pct)+'%</span>';
+            }
+          }
+        }catch(_){}
+      }
+
+      const calcAge = dob => {
+        const b=new Date(dob), n=new Date();
+        let a=n.getFullYear()-b.getFullYear();
+        if(n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))a--;
+        return a;
+      };
+
+      const age      = p.dateOfBirth ? calcAge(p.dateOfBirth) : (p.age || '\u2014');
+      const pos      = p.position || player.position || '\u2014';
+      const club     = (p.club && p.club.name) || p.currentClub || player.club || '\u2014';
+      const nation   = p.citizenship || p.nationality || '\u2014';
+      const contract = (p.contract && p.contract.expires) || p.contractExpires || '\u2014';
+      const foot     = p.foot || '\u2014';
+      const tmUrl    = player.id ? 'https://www.transfermarkt.com/player/profil/spieler/' + player.id : null;
+
+      valueEl.innerHTML =
+        '<div style="padding:8px 14px 4px;font-family:\'Share Tech Mono\',monospace;font-size:9px;color:#d7fff1">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        +'<span style="font-size:11px;color:#39ff6a;font-weight:bold">'+(p.name||player.name||playerName)+'</span>'
+        +'<span style="font-size:11px;font-weight:bold;color:#5af5ff">'+mvFmt+trendHTML+'</span>'
+        +'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;color:#7a9e88;margin-bottom:8px">'
+        +'<div><span style="color:#445b50">AGE</span><br>'+age+'</div>'
+        +'<div><span style="color:#445b50">POS</span><br>'+pos+'</div>'
+        +'<div><span style="color:#445b50">CLUB</span><br>'+club+'</div>'
+        +'<div><span style="color:#445b50">NAT</span><br>'+nation+'</div>'
+        +'<div><span style="color:#445b50">CONTRACT</span><br>'+contract+'</div>'
+        +'<div><span style="color:#445b50">FOOT</span><br>'+foot+'</div>'
+        +'</div>'
+        +(tmUrl ? '<a href="'+tmUrl+'" target="_blank" style="color:#39ff6a;font-size:8px;text-decoration:none;opacity:.7">\u2B21 TRANSFERMARKT \u2192</a>' : '')
+        +'<div style="color:#2d5040;font-size:7px;margin-top:4px">SOURCE \u00B7 TRANSFERMARKT</div>'
+        +'</div>';
+
+    } catch(err){
+      valueLabelEl.style.display = 'none';
+      valueEl.innerHTML = '';
+    }
+  }
 
   // ── Patch feed injection to make items clickable ──
   function patchFeedItem(item, eventData){
