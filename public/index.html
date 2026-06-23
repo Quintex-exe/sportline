@@ -3374,7 +3374,32 @@ window.FOOTINT_ARC_PATCH = {
   .pm-col-label:nth-child(2) { text-align: right; }
   .pm-col-label:nth-child(3) { text-align: right; }
 
-  #pm-body { padding: 2px 0 4px; }
+  #pm-search-wrap {
+    padding: 4px 8px 3px;
+    border-bottom: 1px solid rgba(57,255,106,0.08);
+    display: flex; align-items: center; gap: 6px;
+  }
+  #pm-search {
+    flex: 1;
+    background: rgba(57,255,106,0.05);
+    border: 1px solid rgba(57,255,106,0.15);
+    border-radius: 4px;
+    color: #c0e8d0;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.5px;
+    padding: 4px 7px; outline: none;
+    transition: border-color .15s;
+  }
+  #pm-search::placeholder { color: #3a5e4c; }
+  #pm-search:focus { border-color: rgba(57,255,106,0.4); background: rgba(57,255,106,0.08); }
+  #pm-search-status {
+    font-size: 7.5px; color: #3a5e4c;
+    letter-spacing: 0.6px; white-space: nowrap;
+    min-width: 52px; text-align: right;
+  }
+  #pm-body { padding: 2px 0 4px; max-height: 280px; overflow-y: auto; }
+  #pm-body::-webkit-scrollbar { width: 2px; }
+  #pm-body::-webkit-scrollbar-thumb { background: rgba(57,255,106,0.15); border-radius: 2px; }
 
   .pm-row {
     display: grid;
@@ -3438,6 +3463,7 @@ window.FOOTINT_ARC_PATCH = {
   .pm-chg.down { color: #ff6b6b; }
   .pm-chg.flat { color: #445; }
 
+  #player-market.collapsed #pm-search-wrap,
   #player-market.collapsed #pm-col-row,
   #player-market.collapsed #pm-body { display: none; }
 
@@ -3759,6 +3785,11 @@ window.FOOTINT_ARC_PATCH = {
     </div>
   </div>
 
+  <div id="pm-search-wrap">
+    <input id="pm-search" type="text" placeholder="Search player…" autocomplete="off" spellcheck="false"/>
+    <div id="pm-search-status"></div>
+  </div>
+
   <div class="pm-col-row" id="pm-col-row">
     <span class="pm-col-label">PLAYER</span>
     <span class="pm-col-label">VALUE</span>
@@ -3770,19 +3801,47 @@ window.FOOTINT_ARC_PATCH = {
 
 <script>
 (function(){
-  // ── Player list with Transfermarkt IDs for live value fetching ───────────────
-  const PLAYERS = [
-    { name:'Mbappé',      club:'Real Madrid',   pos:'FW', tmId:'342229',  val:null, chg:null },
-    { name:'Vinicius Jr', club:'Real Madrid',   pos:'FW', tmId:'371998',  val:null, chg:null },
-    { name:'Bellingham',  club:'Real Madrid',   pos:'MF', tmId:'581678',  val:null, chg:null },
-    { name:'Haaland',     club:'Man City',      pos:'FW', tmId:'418560',  val:null, chg:null },
-    { name:'Pedri',       club:'Barcelona',     pos:'MF', tmId:'722836',  val:null, chg:null },
-    { name:'Saka',        club:'Arsenal',       pos:'FW', tmId:'779501',  val:null, chg:null },
-    { name:'Salah',       club:'Liverpool',     pos:'FW', tmId:'148455',  val:null, chg:null },
-    { name:'De Bruyne',   club:'Man City',      pos:'MF', tmId:'88755',   val:null, chg:null },
-    { name:'Yamal',       club:'Barcelona',     pos:'FW', tmId:'987938',  val:null, chg:null },
-    { name:'Wirtz',       club:'B. Leverkusen', pos:'MF', tmId:'921361',  val:null, chg:null },
+
+  // ── Watchlist: top players with verified Transfermarkt IDs ───────────────────
+  const WATCHLIST = [
+    // Real Madrid
+    { name:'Mbappé',        club:'Real Madrid',    pos:'FW', tmId:'342229'  },
+    { name:'Vinicius Jr',   club:'Real Madrid',    pos:'FW', tmId:'371998'  },
+    { name:'Bellingham',    club:'Real Madrid',    pos:'MF', tmId:'581678'  },
+    { name:'Valverde',      club:'Real Madrid',    pos:'MF', tmId:'339365'  },
+    // Man City
+    { name:'Haaland',       club:'Man City',       pos:'FW', tmId:'418560'  },
+    { name:'De Bruyne',     club:'Man City',       pos:'MF', tmId:'88755'   },
+    { name:'Phil Foden',    club:'Man City',       pos:'MF', tmId:'406635'  },
+    // Barcelona
+    { name:'Pedri',         club:'Barcelona',      pos:'MF', tmId:'722836'  },
+    { name:'Yamal',         club:'Barcelona',      pos:'FW', tmId:'987938'  },
+    { name:'Raphinha',      club:'Barcelona',      pos:'FW', tmId:'244306'  },
+    // Arsenal
+    { name:'Saka',          club:'Arsenal',        pos:'FW', tmId:'779501'  },
+    { name:'Odegaard',      club:'Arsenal',        pos:'MF', tmId:'294057'  },
+    // Liverpool
+    { name:'Salah',         club:'Liverpool',      pos:'FW', tmId:'148455'  },
+    { name:'Slot',          club:'Liverpool',      pos:'MF', tmId:'983986'  },
+    // Leverkusen
+    { name:'Wirtz',         club:'B. Leverkusen',  pos:'MF', tmId:'921361'  },
+    // PSG
+    { name:'Dembélé',       club:'PSG',            pos:'FW', tmId:'200512'  },
+    // Bayern
+    { name:'Kane',          club:'Bayern',         pos:'FW', tmId:'132098'  },
+    { name:'Musiala',       club:'Bayern',         pos:'MF', tmId:'580195'  },
+    // Inter
+    { name:'Lautaro',       club:'Inter Milan',    pos:'FW', tmId:'406625'  },
+    { name:'Barella',       club:'Inter Milan',    pos:'MF', tmId:'255942'  },
   ];
+
+  // Assign val/chg fields
+  WATCHLIST.forEach(p => { p.val = null; p.chg = null; });
+
+  // Active list shown in panel (watchlist or search results)
+  let activeList = WATCHLIST.slice(0, 10);
+
+  const TM_BASE = 'https://transfermarkt-api.vercel.app';
 
   function fmtVal(v){
     if(v === null) return '…';
@@ -3791,17 +3850,18 @@ window.FOOTINT_ARC_PATCH = {
     return '€' + (v/1e3).toFixed(0) + 'K';
   }
 
-  function renderRows(loading = false){
+  function renderRows(list, loading = false){
     const body = document.getElementById('pm-body');
     body.innerHTML = '';
-    PLAYERS.forEach(p => {
-      const up   = p.chg !== null && p.chg > 0.05;
-      const down = p.chg !== null && p.chg < -0.05;
-      const dir  = up ? 'up' : down ? 'down' : 'flat';
-      const arrow= up ? '▲' : down ? '▼' : '●';
-      const sign = up ? '+' : '';
+    list.forEach(p => {
+      const up    = p.chg !== null && p.chg > 0.05;
+      const down  = p.chg !== null && p.chg < -0.05;
+      const dir   = up ? 'up' : down ? 'down' : 'flat';
+      const arrow = up ? '▲' : down ? '▼' : '●';
+      const sign  = up ? '+' : '';
       const chgTxt = p.chg !== null ? `${sign}${p.chg.toFixed(1)}%` : (loading ? '…' : '—');
-      const row  = document.createElement('div');
+      const safeId = (p.tmId || p.name).replace(/\W/g,'_');
+      const row = document.createElement('div');
       row.className = 'pm-row';
       row.innerHTML = `
         <div class="pm-player">
@@ -3811,75 +3871,156 @@ window.FOOTINT_ARC_PATCH = {
           </div>
           <span class="pm-meta">${p.club} · ${p.pos}</span>
         </div>
-        <div class="pm-val" id="pm-val-${p.tmId}">${fmtVal(p.val)}</div>
-        <div class="pm-chg ${dir}" id="pm-chg-${p.tmId}">${chgTxt}</div>
+        <div class="pm-val" id="pmv-${safeId}">${fmtVal(p.val)}</div>
+        <div class="pm-chg ${dir}" id="pmc-${safeId}">${chgTxt}</div>
       `;
       body.appendChild(row);
     });
   }
 
-  // ── Fetch live market values from Transfermarkt API ────────────────────────
-  async function fetchLiveValues(){
+  // ── Fetch value for a single player object ───────────────────────────────────
+  async function hydratePlayer(p){
+    if(!p.tmId) return;
+    const safeId = p.tmId.replace(/\W/g,'_');
+    try {
+      const profRes = await fetch(`${TM_BASE}/players/${p.tmId}/profile`);
+      if(!profRes.ok) return;
+      const prof = await profRes.json();
+
+      // Parse market value — TM API returns string like "€180.00m" or raw number
+      let mv = prof.marketValue;
+      if(typeof mv === 'string'){
+        const clean = mv.replace(/[€,\s]/gi,'').toLowerCase();
+        if(clean.endsWith('m'))      mv = parseFloat(clean) * 1e6;
+        else if(clean.endsWith('k')) mv = parseFloat(clean) * 1e3;
+        else                         mv = parseFloat(clean) || null;
+      }
+      if(mv) p.val = mv;
+
+      // Trend from history
+      const histRes = await fetch(`${TM_BASE}/players/${p.tmId}/market_value`);
+      if(histRes.ok){
+        const hd  = await histRes.json();
+        const pts = (hd.marketValueHistory || hd.history || [])
+          .filter(x => x.value || x.marketValue)
+          .map(x => {
+            let v = x.value || x.marketValue;
+            if(typeof v === 'string'){
+              const c = v.replace(/[€,\s]/gi,'').toLowerCase();
+              if(c.endsWith('m'))      v = parseFloat(c) * 1e6;
+              else if(c.endsWith('k')) v = parseFloat(c) * 1e3;
+              else                     v = parseFloat(c) || null;
+            }
+            return v;
+          }).filter(Boolean);
+        if(pts.length >= 2){
+          const prev = pts[pts.length - 2];
+          const curr = pts[pts.length - 1];
+          p.chg = parseFloat(((curr - prev) / prev * 100).toFixed(1));
+          if(!p.val) p.val = curr;
+        }
+      }
+
+      // Update cells live
+      const valEl = document.getElementById('pmv-' + safeId);
+      const chgEl = document.getElementById('pmc-' + safeId);
+      if(valEl) valEl.textContent = fmtVal(p.val);
+      if(chgEl && p.chg !== null){
+        const up = p.chg > 0.05, dn = p.chg < -0.05;
+        chgEl.className = 'pm-chg ' + (up ? 'up' : dn ? 'down' : 'flat');
+        chgEl.textContent = (up ? '+' : '') + p.chg.toFixed(1) + '%';
+      }
+    } catch(_){}
+  }
+
+  // ── Fetch all visible rows ────────────────────────────────────────────────────
+  async function fetchLiveValues(list){
     document.getElementById('pm-updated').textContent = 'FETCHING…';
-    renderRows(true);
-
-    const TM_BASE = 'https://transfermarkt-api.vercel.app';
-
-    await Promise.allSettled(PLAYERS.map(async p => {
-      try {
-        // Current market value from profile
-        const profRes = await fetch(`${TM_BASE}/players/${p.tmId}/profile`);
-        if(!profRes.ok) return;
-        const prof = await profRes.json();
-        const mv = prof.marketValue || null;
-        if(mv) p.val = mv;
-
-        // Trend: last two history points
-        const histRes = await fetch(`${TM_BASE}/players/${p.tmId}/market_value`);
-        if(histRes.ok){
-          const hd  = await histRes.json();
-          const pts = (hd.marketValueHistory || hd.history || []).filter(x => x.value);
-          if(pts.length >= 2){
-            const prev = pts[pts.length - 2].value;
-            const curr = pts[pts.length - 1].value;
-            p.chg = prev ? parseFloat(((curr - prev) / prev * 100).toFixed(1)) : null;
-            if(mv === null && curr) p.val = curr;
-          }
-        }
-
-        // Live update individual cells without full re-render
-        const valEl = document.getElementById('pm-val-' + p.tmId);
-        const chgEl = document.getElementById('pm-chg-' + p.tmId);
-        if(valEl) valEl.textContent = fmtVal(p.val);
-        if(chgEl && p.chg !== null){
-          const up = p.chg > 0.05, dn = p.chg < -0.05;
-          chgEl.className = 'pm-chg ' + (up ? 'up' : dn ? 'down' : 'flat');
-          chgEl.textContent = (up ? '+' : '') + p.chg.toFixed(1) + '%';
-        }
-      } catch(_){}
-    }));
-
+    renderRows(list, true);
+    await Promise.allSettled(list.map(p => hydratePlayer(p)));
     const now = new Date();
     document.getElementById('pm-updated').textContent =
       'LIVE · ' + now.toUTCString().slice(17, 22) + ' UTC';
   }
 
-  // Initial load on panel open
-  fetchLiveValues();
+  // ── Search via TM API ─────────────────────────────────────────────────────────
+  let searchTimer = null;
+  let lastQuery   = '';
 
-  renderRows();
+  async function doSearch(q){
+    if(q === lastQuery) return;
+    lastQuery = q;
+    const status = document.getElementById('pm-search-status');
 
-  // Refresh — hits real Transfermarkt API
+    if(q.length < 2){
+      activeList = WATCHLIST.slice(0, 10);
+      fetchLiveValues(activeList);
+      status.textContent = '';
+      return;
+    }
+
+    status.textContent = 'SEARCHING…';
+    renderRows([], false);
+
+    try {
+      const res  = await fetch(`${TM_BASE}/players/search/${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const hits = (data.results || data.players || []).slice(0, 12);
+
+      if(!hits.length){
+        status.textContent = 'NO RESULTS';
+        return;
+      }
+
+      // Map TM search results to our player shape
+      const results = hits.map(h => ({
+        name:  h.name || h.playerName || q,
+        club:  (h.club && (h.club.name || h.club)) || h.currentClub || '—',
+        pos:   h.position || h.pos || '—',
+        tmId:  String(h.id || h.playerId || ''),
+        val:   null,
+        chg:   null,
+      })).filter(p => p.tmId);
+
+      activeList = results;
+      status.textContent = `${results.length} FOUND`;
+      renderRows(results, true);
+      await Promise.allSettled(results.map(p => hydratePlayer(p)));
+      const now = new Date();
+      document.getElementById('pm-updated').textContent =
+        'LIVE · ' + now.toUTCString().slice(17, 22) + ' UTC';
+    } catch(e){
+      status.textContent = 'ERROR';
+    }
+  }
+
+  // ── Search input wiring ───────────────────────────────────────────────────────
+  const searchEl = document.getElementById('pm-search');
+  searchEl.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => doSearch(searchEl.value.trim()), 400);
+  });
+  searchEl.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ searchEl.value = ''; doSearch(''); }
+    e.stopPropagation();
+  });
+  // Prevent globe drag from swallowing search clicks
+  searchEl.addEventListener('mousedown', e => e.stopPropagation());
+
+  // ── Initial load ──────────────────────────────────────────────────────────────
+  fetchLiveValues(activeList);
+
+  // ── Refresh button ────────────────────────────────────────────────────────────
   const refreshBtn = document.getElementById('pm-refresh-btn');
   refreshBtn.addEventListener('click', e => {
     e.stopPropagation();
     refreshBtn.classList.add('pm-spinning');
-    fetchLiveValues().finally(() => {
+    fetchLiveValues(activeList).finally(() => {
       setTimeout(() => refreshBtn.classList.remove('pm-spinning'), 400);
     });
   });
 
-  // Collapse
+  // ── Collapse ──────────────────────────────────────────────────────────────────
   const colBtn = document.getElementById('pm-collapse-btn');
   const panel  = document.getElementById('player-market');
   colBtn.addEventListener('click', e => {
@@ -3888,85 +4029,11 @@ window.FOOTINT_ARC_PATCH = {
     colBtn.textContent = panel.classList.contains('collapsed') ? '+' : '—';
   });
 
-  // Close
+  // ── Close ─────────────────────────────────────────────────────────────────────
   document.getElementById('pm-close-btn').addEventListener('click', e => {
     e.stopPropagation();
     panel.style.transition = 'opacity .25s ease, transform .25s ease';
-    panel.style.opacity = '0';
-    panel.style.transform = 'scale(0.92)';
-    setTimeout(() => panel.style.display = 'none', 260);
-  });
-
-  // Drag
-  let dragging = false, ox = 0, oy = 0;
-  const header = document.getElementById('pm-header');
-
-  header.addEventListener('mousedown', e => {
-    if(e.target.classList.contains('pm-ctrl-btn')) return;
-    dragging = true;
-    const r = panel.getBoundingClientRect();
-    ox = e.clientX - r.left;
-    oy = e.clientY - r.top;
-    panel.classList.add('dragging');
-    document.body.style.userSelect = 'none';
-  });
-
-  document.addEventListener('mousemove', e => {
-    if(!dragging) return;
-    let nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - ox));
-    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - oy));
-    panel.style.left   = nx + 'px';
-    panel.style.top    = ny + 'px';
-    panel.style.bottom = 'auto';
-  });
-
-  document.addEventListener('mouseup', () => {
-    if(!dragging) return;
-    dragging = false;
-    panel.classList.remove('dragging');
-    document.body.style.userSelect = '';
-  });
-
-  // Touch
-  header.addEventListener('touchstart', e => {
-    if(e.target.classList.contains('pm-ctrl-btn')) return;
-    const t = e.touches[0], r = panel.getBoundingClientRect();
-    dragging = true; ox = t.clientX - r.left; oy = t.clientY - r.top;
-    panel.classList.add('dragging');
-  }, { passive: true });
-
-  document.addEventListener('touchmove', e => {
-    if(!dragging) return;
-    const t = e.touches[0];
-    let nx = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  t.clientX - ox));
-    let ny = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, t.clientY - oy));
-    panel.style.left = nx + 'px'; panel.style.top = ny + 'px'; panel.style.bottom = 'auto';
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => { dragging = false; panel.classList.remove('dragging'); });
-
-  // Live flicker
-  setInterval(() => {
-    const idx = Math.floor(Math.random() * PLAYERS.length);
-    const p   = PLAYERS[idx];
-    const d   = (Math.random() - 0.5) * 0.3;
-    p.chg = parseFloat((p.chg + d).toFixed(1));
-    p.val = parseFloat(Math.max(1, p.val + d * 0.1).toFixed(1));
-    const rows = document.querySelectorAll('#pm-body .pm-row');
-    if(!rows[idx]) return;
-    const up   = p.chg > 0.05;
-    const down = p.chg < -0.05;
-    const dir  = up ? 'up' : down ? 'down' : 'flat';
-    const arrow= up ? '▲' : down ? '▼' : '●';
-    const sign = up ? '+' : '';
-    rows[idx].querySelector('.pm-trend').className = `pm-trend ${dir}`;
-    rows[idx].querySelector('.pm-trend').textContent = arrow;
-    rows[idx].querySelector('.pm-val').textContent = fmtVal(p.val);
-    const chgEl = rows[idx].querySelector('.pm-chg');
-    chgEl.className = `pm-chg ${dir}`;
-    chgEl.textContent = `${sign}${p.chg.toFixed(1)}%`;
-    rows[idx].style.background = up ? 'rgba(57,255,106,0.06)' : down ? 'rgba(255,107,107,0.05)' : '';
-    setTimeout(() => { rows[idx].style.background = ''; }, 350);
+    panel.style.opacity = '0';t(() => { rows[idx].style.background = ''; }, 350);
   }, 2800);
 
 })();
