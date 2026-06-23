@@ -176,6 +176,7 @@
     .badge-signing  { background: rgba(90,245,255,0.12);  color: #5af5ff; }
     .badge-scout    { background: rgba(249,199,79,0.12);  color: #f9c74f; }
     .badge-match    { background: rgba(208,170,255,0.12); color: #d0aaff; }
+    .badge-wc       { background: rgba(255,215,0,0.15);   color: #ffd700; }
 
     .alert-route {
       font-size: 12px;
@@ -1753,6 +1754,16 @@ const NODES = [
 
 
 const ALERTS = [
+  { type:'wc', templates:[
+    'FIFA World Cup 2026 squad selection intelligence surge detected.',
+    'National team manager confirms provisional 26-man roster leaked.',
+    'World Cup host city logistics chatter intensifying across feeds.',
+    'Group stage draw analysis dominating global football discourse.',
+    'Late injury concern threatens key player World Cup participation.',
+    'Dark horse nation qualifier run generating heavy scout traffic.',
+    'Inter-confederation playoff result reshapes bracket projections.',
+    'World Cup 2026 broadcast rights negotiations detected in feeds.',
+  ]},
   { type:'transfer', templates:[
     'Fabrizio Romano reports Viktor Gyökeres remains Arsenal priority target.',
     'Florian Wirtz linked with major Premier League move amid contract talks.',
@@ -1794,7 +1805,7 @@ const ALERTS = [
 
 
 const TYPE_COLORS = {
-
+  wc:       '#ffd700',
   transfer: '#39ff6a',
   injury:   '#ff6b6b',
   signing:  '#5af5ff',
@@ -1845,7 +1856,7 @@ function drawCountries() {
 // ── REAL WORLD INTEL SYSTEM ─────────────────────────────
 
 const RSS_URL =
-'https://news.google.com/rss/search?q=football+transfer&hl=en';
+'https://news.google.com/rss/search?q=football+transfer+OR+world+cup+2026&hl=en';
 
 const RSS_PROXY =
 'https://api.rss2json.com/v1/api.json?rss_url=';
@@ -1871,9 +1882,9 @@ const CITY_KEYWORDS = {
   rio:['flamengo','rio','vasco','botafogo'],
   bue:['boca','river plate','argentina','buenos aires','independiente'],
   bog:['millonarios','bogotá','bogota','colombia','nacional'],
-  nyc:['new york','nycfc','red bulls','mls','major league'],
-  la: ['la galaxy','lafc','los angeles','angel city'],
-  mex:['club américa','america','chivas','liga mx','guadalajara','mexico','tigres'],
+  nyc:['new york','nycfc','red bulls','mls','major league','metlife','east rutherford'],
+  la: ['la galaxy','lafc','los angeles','angel city','sofi stadium'],
+  mex:['club américa','america','chivas','liga mx','guadalajara','mexico','tigres','azteca'],
   dub:['al nassr','al hilal','saudi','riyadh','al ittihad','al ahli','saudi pro'],
   tok:['j league','j-league','tokyo','japan','urawa','gamba','vissel'],
   lag:['enyimba','nigeria','lagos','super eagles','npfl','african'],
@@ -1883,6 +1894,18 @@ const CITY_KEYWORDS = {
 function classifyArticle(title){
 
   const t = title.toLowerCase();
+
+  if(
+    t.includes('world cup') ||
+    t.includes('wc 2026') ||
+    t.includes('world cup 2026') ||
+    t.includes('squad list') ||
+    t.includes('national team') ||
+    t.includes('international break') ||
+    t.includes('qualifying') ||
+    t.includes('group stage') ||
+    t.includes('knockout')
+  ) return 'wc';
 
   if(
     t.includes('injur') ||
