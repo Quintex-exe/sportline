@@ -71,30 +71,46 @@ function queueGist(link, title, type) {
 // ── FEEDS ─────────────────────────────────────────────────────────────────────
 
 const FEEDS = [
+  // Transfers & injuries
   'https://news.google.com/rss/search?q=football+transfer',
-  'https://news.google.com/rss/search?q=champions+league',
-  'https://news.google.com/rss/search?q=premier+league',
   'https://news.google.com/rss/search?q=football+injury',
+  'https://news.google.com/rss/search?q=football+signing',
   'https://news.google.com/rss/search?q=football+scouting',
+  // World Cup 2026
+  'https://news.google.com/rss/search?q=world+cup+2026',
+  'https://news.google.com/rss/search?q=fifa+world+cup+squad',
+  'https://news.google.com/rss/search?q=world+cup+qualifying',
+  // Premier League
+  'https://news.google.com/rss/search?q=premier+league',
   'https://news.google.com/rss/search?q=arsenal',
   'https://news.google.com/rss/search?q=chelsea',
   'https://news.google.com/rss/search?q=liverpool',
   'https://news.google.com/rss/search?q=manchester+city',
   'https://news.google.com/rss/search?q=manchester+united',
   'https://news.google.com/rss/search?q=tottenham',
+  'https://news.google.com/rss/search?q=newcastle+united',
+  // La Liga
+  'https://news.google.com/rss/search?q=la+liga',
   'https://news.google.com/rss/search?q=real+madrid',
   'https://news.google.com/rss/search?q=barcelona',
   'https://news.google.com/rss/search?q=atletico+madrid',
-  'https://news.google.com/rss/search?q=la+liga',
+  // Bundesliga
+  'https://news.google.com/rss/search?q=bundesliga',
   'https://news.google.com/rss/search?q=bayern+munich',
   'https://news.google.com/rss/search?q=borussia+dortmund',
-  'https://news.google.com/rss/search?q=bundesliga',
+  // Serie A
   'https://news.google.com/rss/search?q=serie+a',
   'https://news.google.com/rss/search?q=ac+milan',
   'https://news.google.com/rss/search?q=inter+milan',
   'https://news.google.com/rss/search?q=juventus',
+  'https://news.google.com/rss/search?q=napoli',
+  // Ligue 1
+  'https://news.google.com/rss/search?q=ligue+1',
   'https://news.google.com/rss/search?q=psg',
-  'https://news.google.com/rss/search?q=ligue+1'
+  // Others
+  'https://news.google.com/rss/search?q=mls+soccer',
+  'https://news.google.com/rss/search?q=saudi+pro+league',
+  'https://news.google.com/rss/search?q=brasileirao',
 ];
 
 const sentLinks = new Set();
@@ -107,6 +123,7 @@ const analytics = {
   signings:    0,
   scouting:    0,
   matches:     0,
+  wc:          0,
   regions: {
     europe: 0, southamerica: 0, northamerica: 0,
     asia: 0, africa: 0, global: 0
@@ -121,6 +138,9 @@ const analytics = {
 
 function classify(title = '') {
   const t = title.toLowerCase();
+  if (t.includes('world cup') || t.includes('wc 2026') || t.includes('world cup 2026') ||
+      t.includes('national team') || t.includes('international break') ||
+      t.includes('qualifying') || t.includes('group stage') || t.includes('squad list')) return 'wc';
   if (t.includes('injur') || t.includes('ruled out') || t.includes('doubt')) return 'injury';
   if (t.includes('sign')  || t.includes('agreement') || t.includes('contract')) return 'signing';
   if (t.includes('scout') || t.includes('monitor')   || t.includes('tracking')) return 'scout';
@@ -130,11 +150,14 @@ function classify(title = '') {
 
 function detectRegion(text = '') {
   const t = text.toLowerCase();
-  if (t.includes('arsenal')  || t.includes('chelsea')  || t.includes('madrid'))     return 'europe';
-  if (t.includes('flamengo') || t.includes('libertadores'))                          return 'southamerica';
-  if (t.includes('mls')      || t.includes('inter miami'))                           return 'northamerica';
-  if (t.includes('saudi')    || t.includes('al nassr'))                              return 'asia';
-  if (t.includes('caf')      || t.includes('al ahly'))                               return 'africa';
+  if (t.includes('arsenal')  || t.includes('chelsea')   || t.includes('madrid')  ||
+      t.includes('bundesliga')|| t.includes('serie a')  || t.includes('ligue'))       return 'europe';
+  if (t.includes('flamengo') || t.includes('libertadores') || t.includes('brasileirao')) return 'southamerica';
+  if (t.includes('mls')      || t.includes('inter miami') || t.includes('world cup 2026') ||
+      t.includes('usa national') || t.includes('canada'))                              return 'northamerica';
+  if (t.includes('saudi')    || t.includes('al nassr')   || t.includes('j league') ||
+      t.includes('k league'))                                                          return 'asia';
+  if (t.includes('caf')      || t.includes('al ahly')    || t.includes('afcon'))      return 'africa';
   return 'global';
 }
 
@@ -145,6 +168,7 @@ function updateAnalytics(payload) {
     case 'injury':   analytics.injuries++;  break;
     case 'signing':  analytics.signings++;  break;
     case 'scout':    analytics.scouting++;  break;
+    case 'wc':       analytics.wc++;        break;
     default:         analytics.matches++;
   }
   analytics.regions[payload.region] = (analytics.regions[payload.region] || 0) + 1;

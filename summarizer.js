@@ -47,7 +47,11 @@ const DOMAIN_BOOST = {
   // High-value words
   exclusive:7, confirmed:9, official:9, announced:9, sources:7, reports:6,
   according:5, million:7, euros:6, pounds:6, billion:8, record:7,
-  'here we go':10, medical:9, physicals:9, agreement:8
+  'here we go':10, medical:9, physicals:9, agreement:8,
+  // World Cup 2026
+  worldcup:9, 'world cup':9, qualifying:7, qualifier:7, squad:7,
+  'group stage':8, knockout:7, semifinal:8, final:9, host:5,
+  national:6, international:6, 'here we go':10
 };
 
 // ── SSRF guard: block private / loopback / link-local addresses ─────────────
