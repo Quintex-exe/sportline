@@ -1,0 +1,411 @@
+/* ── FOOTINT VALUE TRACKER UI STYLES ──────────────────────────────────────────── */
+
+/* ── VALUE ALERT CONTAINER ────────────────────────────────────────────────────── */
+.value-alert {
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  animation: slideIn 0.4s ease forwards;
+  opacity: 0;
+  border-left: 3px solid rgba(90,245,255,0.3);
+  background: rgba(90,245,255,0.02);
+  margin: 2px 0;
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateX(8px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+/* ── VALUE CARD STYLING ───────────────────────────────────────────────────────── */
+.value-card {
+  background: rgba(3,12,10,0.9);
+  border: 1px solid rgba(57,255,106,0.12);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: #d7fff1;
+}
+
+.value-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.value-player-name {
+  font-weight: bold;
+  color: #d7fff1;
+  font-size: 11px;
+}
+
+.value-change {
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.value-change.positive {
+  color: #39ff6a;
+  animation: valueIncrease 0.6s ease-out;
+}
+
+.value-change.negative {
+  color: #ff6b6b;
+  animation: valueDecrease 0.6s ease-out;
+}
+
+@keyframes valueIncrease {
+  0% { 
+    color: #7a9e88;
+  }
+  50% {
+    color: #39ff6a;
+    text-shadow: 0 0 8px rgba(57,255,106,0.5);
+  }
+  100% {
+    color: #39ff6a;
+  }
+}
+
+@keyframes valueDecrease {
+  0% { 
+    color: #7a9e88;
+  }
+  50% {
+    color: #ff6b6b;
+    text-shadow: 0 0 8px rgba(255,107,107,0.5);
+  }
+  100% {
+    color: #ff6b6b;
+  }
+}
+
+.value-route {
+  color: #7a9e88;
+  font-size: 9px;
+  margin-bottom: 6px;
+}
+
+.value-route-arrow {
+  color: #39ff6a;
+  margin: 0 4px;
+}
+
+/* ── STATS GRID ───────────────────────────────────────────────────────────────── */
+.value-stats {
+  background: rgba(255,255,255,0.03);
+  padding: 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 9px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  color: #557566;
+  font-size: 8px;
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  color: #d9fff0;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+/* ── TREND INDICATOR ──────────────────────────────────────────────────────────── */
+.value-trend {
+  color: #5af5ff;
+  font-size: 9px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trend-icon {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.trend-up {
+  color: #39ff6a;
+}
+
+.trend-down {
+  color: #ff6b6b;
+}
+
+.trend-stable {
+  color: #f9c74f;
+}
+
+/* ── DEAL RATING BADGE ────────────────────────────────────────────────────────── */
+.deal-rating {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.rating-steal {
+  background: rgba(57,255,106,0.15);
+  color: #39ff6a;
+  border: 1px solid rgba(57,255,106,0.25);
+  box-shadow: 0 0 6px rgba(57,255,106,0.2);
+}
+
+.rating-bargain {
+  background: rgba(90,245,255,0.15);
+  color: #5af5ff;
+  border: 1px solid rgba(90,245,255,0.25);
+  box-shadow: 0 0 6px rgba(90,245,255,0.2);
+}
+
+.rating-fair {
+  background: rgba(249,199,79,0.15);
+  color: #f9c74f;
+  border: 1px solid rgba(249,199,79,0.25);
+  box-shadow: 0 0 6px rgba(249,199,79,0.2);
+}
+
+.rating-premium {
+  background: rgba(255,159,107,0.15);
+  color: #ff9f6b;
+  border: 1px solid rgba(255,159,107,0.25);
+  box-shadow: 0 0 6px rgba(255,159,107,0.2);
+}
+
+.rating-overvalued {
+  background: rgba(255,107,107,0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,107,107,0.25);
+  box-shadow: 0 0 6px rgba(255,107,107,0.2);
+}
+
+/* ── SIGNALS SECTION ──────────────────────────────────────────────────────────── */
+.value-signals {
+  border-top: 1px solid rgba(255,255,255,0.03);
+  padding-top: 6px;
+}
+
+.signals-title {
+  color: #f9c74f;
+  font-size: 8px;
+  font-weight: bold;
+  margin-bottom: 3px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.signal-item {
+  font-size: 8px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.signal-icon {
+  flex-shrink: 0;
+  width: 6px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.signal-text {
+  flex: 1;
+  line-height: 1.3;
+}
+
+.signal-high {
+  color: #ff6b6b;
+}
+
+.signal-medium {
+  color: #f9c74f;
+}
+
+.signal-low {
+  color: #7a9e88;
+}
+
+/* ── CONFIDENCE METER ─────────────────────────────────────────────────────────── */
+.confidence-meter {
+  background: rgba(255,255,255,0.03);
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #39ff6a, #5af5ff);
+  box-shadow: 0 0 8px rgba(57,255,106,0.3);
+  transition: width 0.3s ease;
+}
+
+.confidence-label {
+  font-size: 8px;
+  color: #557566;
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+/* ── LOADING STATE ────────────────────────────────────────────────────────────── */
+.value-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.value-loading::after {
+  content: '⟳';
+  display: inline-block;
+  margin-left: 6px;
+  color: #39ff6a;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── ERROR STATE ──────────────────────────────────────────────────────────────── */
+.value-error {
+  border-color: rgba(255,107,107,0.25) !important;
+  background: rgba(255,107,107,0.05) !important;
+}
+
+.value-error-text {
+  color: #ff6b6b;
+  font-size: 9px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.value-error-icon::before {
+  content: '⚠';
+  margin-right: 4px;
+}
+
+/* ── INTEGRATION WITH EXISTING SYSTEM ─────────────────────────────────────────── */
+
+/* Enhance transfer alerts with value context */
+.alert-item[data-type="transfer"] + .value-alert {
+  border-left-color: rgba(57,255,106,0.5);
+}
+
+/* Hover effects */
+.value-card:hover {
+  border-color: rgba(57,255,106,0.2);
+  background: rgba(3,12,10,0.95);
+  box-shadow: 0 0 12px rgba(57,255,106,0.1);
+}
+
+/* Badge animation on value spike */
+.deal-rating.spike {
+  animation: badgeSpike 0.6s ease-out;
+}
+
+@keyframes badgeSpike {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── RESPONSIVE ADJUSTMENTS ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .value-card {
+    font-size: 9px;
+    padding: 8px 10px;
+  }
+
+  .value-stats {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .stat-label {
+    font-size: 7px;
+  }
+
+  .value-player-name {
+    font-size: 10px;
+  }
+}
+
+/* ── DARK MODE SUPPORT ────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .value-card {
+    background: rgba(3,12,10,0.95);
+  }
+
+  .value-stats {
+    background: rgba(255,255,255,0.02);
+  }
+}
+
+/* ── ACCESSIBILITY ────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .value-change,
+  .value-alert,
+  .deal-rating.spike {
+    animation: none;
+  }
+}
+
+/* ── API STATUS INDICATOR ─────────────────────────────────────────────────────── */
+.api-status-badge {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.api-status-badge.live {
+  background: #39ff6a;
+  box-shadow: 0 0 4px rgba(57,255,106,0.5);
+}
+
+.api-status-badge.cached {
+  background: #f9c74f;
+}
+
+.api-status-badge.error {
+  background: #ff6b6b;
+}

@@ -1,3 +1,35 @@
+# Environment — NEVER commit real keys
+.env    4a413130f4e443d4bb0db3a4a7fae612
+
+# Firebase
 firebase-key.json
+
+# Generated feeds cache
 feeds.json
-node_modules
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
